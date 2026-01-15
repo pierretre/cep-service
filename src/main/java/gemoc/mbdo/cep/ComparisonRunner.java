@@ -1,4 +1,7 @@
-package com.example;
+package gemoc.mbdo.cep;
+
+import gemoc.mbdo.cep.esper.EsperCepDemo;
+import gemoc.mbdo.cep.flink.FlinkCepDemo;
 
 public class ComparisonRunner {
 

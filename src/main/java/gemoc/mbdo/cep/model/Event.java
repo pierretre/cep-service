@@ -1,4 +1,4 @@
-package com.example;
+package gemoc.mbdo.cep.model;
 
 public class Event {
     public String id;

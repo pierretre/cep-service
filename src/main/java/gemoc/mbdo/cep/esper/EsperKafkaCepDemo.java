@@ -1,4 +1,4 @@
-package com.example;
+package gemoc.mbdo.cep.esper;
 
 import com.espertech.esper.common.client.EPCompiled;
 import com.espertech.esper.common.client.configuration.Configuration;
@@ -7,11 +7,26 @@ import com.espertech.esper.compiler.client.EPCompileException;
 import com.espertech.esper.compiler.client.EPCompiler;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.*;
+import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.EventDeserializer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
-public class EsperCepDemo {
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
+
+public class EsperKafkaCepDemo {
+
+    private static final String KAFKA_BOOTSTRAP_SERVERS = "localhost:9092";
+    private static final String KAFKA_TOPIC = "events";
+    private static final String KAFKA_GROUP_ID = "esper-cep-consumer";
 
     public static void main(String[] args) throws Exception {
-        System.out.println("\n=== ESPER CEP DEMO ===\n");
+        System.out.println("\n=== ESPER CEP WITH KAFKA ===\n");
 
         // Configure Esper
         Configuration configuration = new Configuration();
@@ -27,14 +42,42 @@ public class EsperCepDemo {
         // SQL-like Query: Aggregate events by type
         runAggregationQuery(runtime, compiler, configuration);
 
-        // Send events
-        sendEvents(runtime);
+        // Create Kafka consumer
+        KafkaConsumer<String, Event> consumer = createKafkaConsumer();
 
-        // Give time for processing
-        Thread.sleep(2000);
+        System.out.println("Esper CEP is listening to Kafka topic: " + KAFKA_TOPIC);
+        System.out.println("Waiting for events...\n");
 
-        runtime.destroy();
-        System.out.println("\n=== ESPER DEMO COMPLETE ===\n");
+        // Consume events from Kafka and send to Esper
+        try {
+            while (true) {
+                ConsumerRecords<String, Event> records = consumer.poll(Duration.ofMillis(100));
+                for (ConsumerRecord<String, Event> record : records) {
+                    Event event = record.value();
+                    System.out.println("[ESPER] Received event: " + event);
+                    runtime.getEventService().sendEventBean(event, "Event");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            consumer.close();
+            runtime.destroy();
+        }
+    }
+
+    private static KafkaConsumer<String, Event> createKafkaConsumer() {
+        Properties props = new Properties();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BOOTSTRAP_SERVERS);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, KAFKA_GROUP_ID);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EventDeserializer.class.getName());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+
+        KafkaConsumer<String, Event> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Collections.singletonList(KAFKA_TOPIC));
+        return consumer;
     }
 
     private static void runPatternQuery(EPRuntime runtime, EPCompiler compiler, Configuration configuration)
@@ -54,7 +97,7 @@ public class EsperCepDemo {
                 "pattern-query");
         statement.addListener((newEvents, oldEvents, stmt, rt) -> {
             for (com.espertech.esper.common.client.EventBean event : newEvents) {
-                System.out.println("ESPER PATTERN ALERT: Two consecutive high-value alerts detected! " +
+                System.out.println("[ESPER] PATTERN ALERT: Two consecutive high-value alerts detected! " +
                         "First: Event{id='" + event.get("firstId") + "', value=" + event.get("firstValue") + "}, " +
                         "Second: Event{id='" + event.get("secondId") + "', value=" + event.get("secondValue") + "}");
             }
@@ -76,36 +119,12 @@ public class EsperCepDemo {
                 "aggregation-query");
         statement.addListener((newEvents, oldEvents, stmt, rt) -> {
             for (com.espertech.esper.common.client.EventBean event : newEvents) {
-                System.out.println("ESPER AGGREGATION: [" +
+                System.out.println("[ESPER] AGGREGATION: [" +
                         event.get("type") + ", " +
                         event.get("event_count") + ", " +
                         event.get("avg_value") + "]");
             }
         });
-    }
-
-    private static void sendEvents(EPRuntime runtime) throws InterruptedException {
-        long timestamp = System.currentTimeMillis();
-
-        System.out.println("Sending events...\n");
-
-        // Same events as Flink demo
-        runtime.getEventService().sendEventBean(new Event("1", "alert", 150.0, timestamp), "Event");
-        Thread.sleep(100);
-
-        runtime.getEventService().sendEventBean(new Event("2", "alert", 120.0, timestamp + 100), "Event");
-        Thread.sleep(100);
-
-        runtime.getEventService().sendEventBean(new Event("3", "info", 50.0, timestamp + 200), "Event");
-        Thread.sleep(100);
-
-        runtime.getEventService().sendEventBean(new Event("4", "alert", 80.0, timestamp + 300), "Event");
-        Thread.sleep(100);
-
-        runtime.getEventService().sendEventBean(new Event("5", "info", 30.0, timestamp + 400), "Event");
-        Thread.sleep(100);
-
-        System.out.println("\nAll events sent.\n");
     }
 
     private static EPCompiled compile(EPCompiler compiler, String epl, Configuration configuration)
