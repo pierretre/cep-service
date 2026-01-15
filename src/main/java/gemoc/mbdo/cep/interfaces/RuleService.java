@@ -5,9 +5,9 @@ import gemoc.mbdo.cep.shared.model.Rule;
 import java.util.List;
 
 public interface RuleService {
-    public void addRule(Rule rule);
+    void addRule(Rule rule);
 
-    public void removeRule(Rule rule) throws Exception;
+    void removeRule(Rule rule) throws Exception;
 
-    public List<Rule> getRules();
+    List<Rule> getRules();
 }
