@@ -1,159 +1,243 @@
-# Flink CEP vs Esper CEP Comparison
+# CEP Rule Management System
 
-A minimal Maven project comparing Apache Flink CEP and Esper CEP implementations with identical event patterns and SQL-like queries. Includes both standalone and Kafka-integrated versions.
+A production-ready Complex Event Processing (CEP) system with separated API and Engine architecture using Esper CEP, Spring Boot, and Kafka.
+
+## Architecture
+
+The system consists of two independent applications:
+
+1. **Rule Management API** (Spring Boot)
+   - REST API for managing CEP rules
+   - H2 database for rule persistence
+   - OpenAPI/Swagger documentation
+
+2. **CEP Engine** (Esper)
+   - Standalone CEP engine
+   - Polls database for rule changes
+   - Consumes events from Kafka
+   - Processes events against active rules
+
+```
+┌─────────────────┐         ┌──────────────┐
+│  Rule Mgmt API  │────────▶│  H2 Database │
+│  (Spring Boot)  │         │    (Rules)   │
+└─────────────────┘         └──────────────┘
+                                    │
+                                    │ Polls every 5s
+                                    ▼
+┌─────────────────┐         ┌──────────────┐
+│  Kafka Producer │────────▶│    Kafka     │
+│   (Test Tool)   │         │   (Events)   │
+└─────────────────┘         └──────────────┘
+                                    │
+                                    │ Consumes
+                                    ▼
+                            ┌──────────────┐
+                            │  CEP Engine  │
+                            │   (Esper)    │
+                            └──────────────┘
+```
 
 ## Features
 
-Both implementations demonstrate:
-- **CEP Pattern Matching**: Detects two consecutive "alert" events with value > 100
-- **SQL/Aggregation Queries**: Groups events by type and calculates count and average value
-- **Simple Event Stream**: Uses identical sample events for fair comparison
-- **Kafka Integration**: Both engines can consume events from Kafka in parallel
+- **Dynamic Rule Management**: Add, update, activate/deactivate rules via REST API
+- **Real-time Event Processing**: Process Kafka events with Esper CEP
+- **Rule Synchronization**: Engine automatically picks up rule changes
+- **OpenAPI Documentation**: Interactive Swagger UI for API exploration
+- **Production Ready**: Separated concerns, scalable architecture
 
 ## Requirements
 
 - Java 11 or higher
 - Maven 3.x
-- Docker & Docker Compose (for Kafka integration)
+- Docker & Docker Compose (for Kafka)
 
-## Build
+## Quick Start
+
+### 1. Build the Project
 
 ```bash
 mvn clean package -DskipTests
 ```
 
-## Run Options
+### 2. Start Kafka
 
-### Option 1: Standalone Comparison (No Kafka)
-
-Run both implementations with embedded event sources:
-
-```bash
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.ComparisonRunner
-```
-
-Or run individually:
-- **Flink CEP**: `java -jar target/flink-cep-demo-1.0-SNAPSHOT.jar`
-- **Esper CEP**: `java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.esper.EsperCepDemo`
-
-### Option 2: Kafka Integration
-
-See [KAFKA_SETUP.md](KAFKA_SETUP.md) for detailed instructions.
-
-**Quick Start:**
-
-1. Start Kafka:
 ```bash
 docker-compose up -d
 ```
 
-2. Run consumers (in separate terminals):
-```bash
-# Terminal 1 - Flink
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.flink.FlinkKafkaCepDemo
+### 3. Start the Rule Management API
 
-# Terminal 2 - Esper
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.esper.EsperKafkaCepDemo
+```bash
+./run.sh api
 ```
 
-3. Send events:
+Access points:
+- API: http://localhost:8080/api/rules
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- H2 Console: http://localhost:8080/h2-console
+
+### 4. Start the CEP Engine
+
 ```bash
-# Terminal 3 - Producer
+./run.sh engine
+```
+
+### 5. Create a Rule
+
+```bash
+curl -X POST http://localhost:8080/api/rules \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "HighTemperatureAlert",
+    "eplQuery": "select * from Event(temperature > 100)",
+    "description": "Alert on high temperature",
+    "active": true
+  }'
+```
+
+### 6. Send Test Events
+
+```bash
 java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.KafkaEventProducer
 ```
 
 ## Project Structure
 
-### Core Classes
-- `Event.java` - POJO for events (with getters/setters)
-- `FlinkCepDemo.java` - Flink CEP standalone implementation
-- `EsperCepDemo.java` - Esper CEP standalone implementation
-- `ComparisonRunner.java` - Runs both for comparison
-
-### Kafka Integration
-- `FlinkKafkaCepDemo.java` - Flink CEP with Kafka consumer
-- `EsperKafkaCepDemo.java` - Esper CEP with Kafka consumer
-- `KafkaEventProducer.java` - Sends events to Kafka
-- `EventSerializer.java` / `EventDeserializer.java` - JSON serialization
-
-### Configuration
-- `pom.xml` - Maven dependencies (Flink 1.18.0, Esper 8.9.0, Kafka 3.6.0)
-- `docker-compose.yml` - Kafka & Zookeeper setup
-
-### Documentation
-- `README.md` - This file
-- `COMPARISON.md` - Detailed comparison of Flink vs Esper
-- `KAFKA_SETUP.md` - Kafka integration guide
-
-## Implementation Comparison
-
-### Flink CEP
-- **Pattern Syntax**: Java API with fluent pattern builder
-- **SQL**: Flink Table API with SQL queries
-- **Execution**: Streaming dataflow with watermarks
-- **Output**: Changelog stream format
-- **Kafka**: Native Flink Kafka connector
-
-### Esper EPL
-- **Pattern Syntax**: EPL (Event Processing Language) - SQL-like syntax
-- **SQL**: Native EPL SELECT statements
-- **Execution**: Event-driven with listeners
-- **Output**: Direct event callbacks
-- **Kafka**: Standard Kafka Consumer API
-
-## Sample Output
-
-Both implementations process the same 5 events:
-1. Event(id='1', type='alert', value=150.0)
-2. Event(id='2', type='alert', value=120.0) ← Pattern match!
-3. Event(id='3', type='info', value=50.0)
-4. Event(id='4', type='alert', value=80.0)
-5. Event(id='5', type='info', value=30.0)
-
-**Pattern Detection**: Both detect events 1 & 2 as consecutive high-value alerts
-
-**Aggregations**: Both calculate counts and averages grouped by event type
-
-## Architecture
-
-### Standalone Mode
 ```
-Event Source → Flink CEP → Console Output
-Event Source → Esper CEP → Console Output
+src/main/java/gemoc/mbdo/cep/
+├── api/                          # Rule Management API (Spring Boot)
+│   ├── RuleManagementApplication.java
+│   ├── config/
+│   │   └── OpenApiConfig.java
+│   ├── controller/
+│   │   └── RuleController.java
+│   ├── dto/
+│   │   ├── RuleRequest.java
+│   │   └── RuleResponse.java
+│   ├── repository/
+│   │   └── RuleRepository.java
+│   └── service/
+│       └── RuleServiceImpl.java
+├── engine/                       # CEP Engine (Esper)
+│   ├── CepEngineApplication.java
+│   ├── EsperCepEngineImpl.java
+│   ├── KafkaEventConsumer.java
+│   ├── RuleSynchronizer.java
+│   └── model/
+│       └── Event.java
+├── shared/                       # Shared models
+│   └── model/
+│       └── Rule.java
+├── interfaces/                   # Interfaces
+│   ├── CepEngine.java
+│   └── RuleService.java
+├── EventSerializer.java          # Kafka serialization
+├── EventDeserializer.java
+└── KafkaEventProducer.java      # Test utility
 ```
 
-### Kafka Mode
+## API Endpoints
+
+All endpoints are documented in Swagger UI at http://localhost:8080/swagger-ui.html
+
+- `GET /api/rules` - Get all rules
+- `GET /api/rules/{id}` - Get rule by ID
+- `GET /api/rules/name/{name}` - Get rule by name
+- `GET /api/rules/active` - Get active rules
+- `POST /api/rules` - Create a new rule
+- `PUT /api/rules/{id}` - Update a rule
+- `DELETE /api/rules/{id}` - Delete a rule
+- `PATCH /api/rules/{id}/activate` - Activate a rule
+- `PATCH /api/rules/{id}/deactivate` - Deactivate a rule
+
+## Configuration
+
+Configuration is in `src/main/resources/application.yml`:
+
+```yaml
+# Database
+spring.datasource.url: jdbc:h2:./data/cep-rules
+
+# Kafka
+cep.kafka.bootstrap-servers: localhost:9092
+cep.kafka.topic: events
+
+# Rule Synchronization
+cep.rule-sync-interval-ms: 5000
 ```
-Kafka Producer → Kafka Topic (events)
-                      ↓
-                 ┌────┴────┐
-                 ↓         ↓
-            Flink CEP   Esper CEP
-                 ↓         ↓
-            Console    Console
+
+## Documentation
+
+- **[QUICKSTART_SEPARATED.md](QUICKSTART_SEPARATED.md)** - Detailed quick start guide
+- **[SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)** - System architecture and design
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Testing scenarios and examples
+- **[KAFKA_SETUP.md](KAFKA_SETUP.md)** - Kafka setup and configuration
+- **[SWAGGER_GUIDE.md](SWAGGER_GUIDE.md)** - OpenAPI/Swagger documentation guide
+
+## Example: Temperature Monitoring
+
+1. Create a rule to detect high temperatures:
+
+```bash
+curl -X POST http://localhost:8080/api/rules \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "HighTemp",
+    "eplQuery": "select * from Event(temperature > 100)",
+    "description": "High temperature alert",
+    "active": true
+  }'
 ```
 
-Both CEP engines consume from the same Kafka topic using different consumer groups, ensuring independent processing of all events.
+2. The CEP engine will automatically pick up the rule within 5 seconds
 
-## Key Differences
+3. Send events with temperature data - the engine will match and log alerts
 
-| Aspect | Flink CEP | Esper CEP |
-|--------|-----------|-----------|
-| **Deployment** | Distributed cluster | Single JVM |
-| **Scalability** | Horizontal | Vertical |
-| **Latency** | 10-100ms | 1-10ms |
-| **Throughput** | Millions/sec | 100K-1M/sec |
-| **Syntax** | Java API | SQL-like EPL |
-| **State** | Distributed | In-memory |
+## Technology Stack
 
-See [COMPARISON.md](COMPARISON.md) for detailed analysis.
+- **Esper CEP 8.9.0** - Complex Event Processing engine
+- **Spring Boot 2.7.18** - REST API framework
+- **Apache Kafka 3.6.0** - Event streaming
+- **H2 Database** - Rule persistence
+- **SpringDoc OpenAPI 1.7.0** - API documentation
 
-## Next Steps
+## Development
 
-1. Modify event patterns and queries
-2. Add custom event types
-3. Scale Kafka with multiple partitions
-4. Implement windowing strategies
-5. Add monitoring and metrics
-6. Deploy to production cluster (Flink)
+### Run in Development Mode
 
+```bash
+# Terminal 1 - API
+mvn spring-boot:run -Dspring-boot.run.main-class=gemoc.mbdo.cep.api.RuleManagementApplication
+
+# Terminal 2 - Engine
+mvn exec:java -Dexec.mainClass=gemoc.mbdo.cep.engine.CepEngineApplication
+```
+
+### Run Tests
+
+```bash
+mvn test
+```
+
+## Production Deployment
+
+1. Build the JAR:
+```bash
+mvn clean package
+```
+
+2. Run as separate services:
+```bash
+# API Service
+java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.api.RuleManagementApplication
+
+# Engine Service
+java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.engine.CepEngineApplication
+```
+
+3. Configure external database and Kafka cluster in `application.yml`
+
+## License
+
+MIT License
