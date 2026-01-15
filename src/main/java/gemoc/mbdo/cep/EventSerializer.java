@@ -1,7 +1,7 @@
 package gemoc.mbdo.cep;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.util.Map;

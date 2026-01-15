@@ -4,7 +4,7 @@ import com.espertech.esper.common.client.configuration.Configuration;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.EPRuntime;
 import com.espertech.esper.runtime.client.EPRuntimeProvider;
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 import gemoc.mbdo.cep.EventDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,23 +18,23 @@ import java.util.Properties;
 
 /**
  * Complete demo with REST API + Kafka + Dynamic Rules
- * 
+ * <p>
  * Usage:
  * 1. Start this application
  * 2. Use KafkaEventProducer to send events
  * 3. Use curl or Postman to manage rules via REST API
- * 
+ * <p>
  * Example API calls:
- * 
+ * <p>
  * # List rules
  * curl http://localhost:8080/rules
- * 
+ * <p>
  * # Add a rule
  * curl -X POST http://localhost:8080/rules \
  * -H "Content-Type: application/json" \
  * -d '{"name":"my-rule","epl":"select * from Event(type=\"alert\" and value >
  * 100)"}'
- * 
+ * <p>
  * # Remove a rule
  * curl -X DELETE http://localhost:8080/rules/my-rule
  */

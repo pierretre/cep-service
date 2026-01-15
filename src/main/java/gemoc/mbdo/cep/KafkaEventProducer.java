@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep;
 
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;

@@ -4,7 +4,7 @@ import com.espertech.esper.common.client.configuration.Configuration;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.EPRuntime;
 import com.espertech.esper.runtime.client.EPRuntimeProvider;
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 
 import java.util.Scanner;
 
@@ -169,7 +169,7 @@ public class DynamicRuleDemo {
 
     private static Thread startEventProducer(EPRuntime runtime) {
         Thread thread = new Thread(() -> {
-            String[] types = { "alert", "info", "warning", "error", "critical" };
+            String[] types = {"alert", "info", "warning", "error", "critical"};
             int eventId = 1;
 
             try {

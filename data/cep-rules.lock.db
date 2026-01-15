@@ -1,0 +1,6 @@
+#FileLock
+#Thu Jan 15 12:04:12 CET 2026
+hostName=pierr-thinkpad-p14s.lan
+id=19bc153c8d85a95bfb31ba7b15ae4046255793cc219
+method=file
+server=192.168.1.108\:36527

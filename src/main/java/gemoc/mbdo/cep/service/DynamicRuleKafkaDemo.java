@@ -4,7 +4,7 @@ import com.espertech.esper.common.client.configuration.Configuration;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.EPRuntime;
 import com.espertech.esper.runtime.client.EPRuntimeProvider;
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 import gemoc.mbdo.cep.EventDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

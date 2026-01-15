@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.flink;
 
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.cep.CEP;
 import org.apache.flink.cep.PatternStream;

@@ -8,9 +8,7 @@ import com.espertech.esper.compiler.client.EPCompiler;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.*;
 import gemoc.mbdo.cep.interfaces.CepEngine;
-import gemoc.mbdo.cep.model.Event;
-
-import java.util.StringJoiner;
+import gemoc.mbdo.cep.engine.model.Event;
 
 public class EsperCepEngine implements CepEngine {
 
@@ -34,7 +32,6 @@ public class EsperCepEngine implements CepEngine {
 
         runtime.destroy();
     }
-
 
     @Override
     public void checkPattern(String pattern) throws EPCompileException {

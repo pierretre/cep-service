@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.interfaces;
 
-import gemoc.mbdo.cep.model.Rule;
+import gemoc.mbdo.cep.shared.model.Rule;
 
 import java.util.List;
 

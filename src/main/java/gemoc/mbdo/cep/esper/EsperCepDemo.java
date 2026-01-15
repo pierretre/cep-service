@@ -7,7 +7,7 @@ import com.espertech.esper.compiler.client.EPCompileException;
 import com.espertech.esper.compiler.client.EPCompiler;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.*;
-import gemoc.mbdo.cep.model.Event;
+import gemoc.mbdo.cep.engine.model.Event;
 
 public class EsperCepDemo {
 
