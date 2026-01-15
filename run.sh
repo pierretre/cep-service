@@ -2,7 +2,7 @@
 
 # CEP System Runner Script
 
-JAR_FILE="target/flink-cep-demo-1.0-SNAPSHOT.jar"
+JAR_FILE="target/cep-demo-1.0-SNAPSHOT.jar"
 
 # Check if JAR exists
 if [ ! -f "$JAR_FILE" ]; then
@@ -12,17 +12,15 @@ fi
 
 # Function to display usage
 usage() {
-    echo "Usage: ./run.sh [api|engine|producer]"
+    echo "Usage: ./run.sh [api|engine]"
     echo ""
     echo "Commands:"
     echo "  api       - Start the Rule Management API (Spring Boot)"
     echo "  engine    - Start the CEP Engine (Esper)"
-    echo "  producer  - Start the Kafka Event Producer (test tool)"
     echo ""
     echo "Examples:"
-    echo "  ./run.sh api       # Start API on port 8080"
+    echo "  ./run.sh api       # Start API on port 8081"
     echo "  ./run.sh engine    # Start CEP Engine"
-    echo "  ./run.sh producer  # Send test events to Kafka"
     exit 1
 }
 
@@ -39,10 +37,6 @@ case "$1" in
     engine)
         echo "Starting CEP Engine..."
         java -cp "$JAR_FILE" gemoc.mbdo.cep.engine.CepEngineApplication
-        ;;
-    producer)
-        echo "Starting Kafka Event Producer..."
-        java -cp "$JAR_FILE" gemoc.mbdo.cep.KafkaEventProducer
         ;;
     *)
         echo "Error: Unknown command '$1'"

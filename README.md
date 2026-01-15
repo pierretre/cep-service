@@ -73,9 +73,9 @@ docker-compose up -d
 ```
 
 Access points:
-- API: http://localhost:8080/api/rules
-- Swagger UI: http://localhost:8080/swagger-ui.html
-- H2 Console: http://localhost:8080/h2-console
+- API: http://localhost:8081/api/rules
+- Swagger UI: http://localhost:8081/swagger-ui.html
+- H2 Console: http://localhost:8081/h2-console
 
 ### 4. Start the CEP Engine
 
@@ -86,7 +86,7 @@ Access points:
 ### 5. Create a Rule
 
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "HighTemperatureAlert",
@@ -99,7 +99,7 @@ curl -X POST http://localhost:8080/api/rules \
 ### 6. Send Test Events
 
 ```bash
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.KafkaEventProducer
+java -cp target/cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.KafkaEventProducer
 ```
 
 ## Project Structure
@@ -139,7 +139,7 @@ src/main/java/gemoc/mbdo/cep/
 
 ## API Endpoints
 
-All endpoints are documented in Swagger UI at http://localhost:8080/swagger-ui.html
+All endpoints are documented in Swagger UI at http://localhost:8081/swagger-ui.html
 
 - `GET /api/rules` - Get all rules
 - `GET /api/rules/{id}` - Get rule by ID
@@ -180,7 +180,7 @@ cep.rule-sync-interval-ms: 5000
 1. Create a rule to detect high temperatures:
 
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "HighTemp",
@@ -230,10 +230,10 @@ mvn clean package
 2. Run as separate services:
 ```bash
 # API Service
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.api.RuleManagementApplication
+java -cp target/cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.api.RuleManagementApplication
 
 # Engine Service
-java -cp target/flink-cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.engine.CepEngineApplication
+java -cp target/cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.engine.CepEngineApplication
 ```
 
 3. Configure external database and Kafka cluster in `application.yml`

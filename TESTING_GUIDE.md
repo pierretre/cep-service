@@ -22,7 +22,7 @@ mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.engine.CepEngineApplication"
 
 2. **Create a rule** (Terminal 4):
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "test-high-value",
@@ -75,12 +75,12 @@ mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.KafkaEventProducer"
 
 1. **List active rules**:
 ```bash
-curl http://localhost:8080/api/rules/active
+curl http://localhost:8081/api/rules/active
 ```
 
 2. **Deactivate rule**:
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/deactivate
+curl -X PATCH http://localhost:8081/api/rules/1/deactivate
 ```
 
 3. **Wait 5 seconds** and check Terminal 3 for:
@@ -92,7 +92,7 @@ curl -X PATCH http://localhost:8080/api/rules/1/deactivate
 
 5. **Reactivate rule**:
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/activate
+curl -X PATCH http://localhost:8081/api/rules/1/activate
 ```
 
 6. **Wait 5 seconds** and verify rule is redeployed
@@ -116,7 +116,7 @@ curl -X PATCH http://localhost:8080/api/rules/1/activate
 
 ```bash
 # Rule 1: High values
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-values",
@@ -124,7 +124,7 @@ curl -X POST http://localhost:8080/api/rules \
   }'
 
 # Rule 2: Alert type
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "alert-type",
@@ -132,7 +132,7 @@ curl -X POST http://localhost:8080/api/rules \
   }'
 
 # Rule 3: Combined
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-alerts",
@@ -170,7 +170,7 @@ curl -X POST http://localhost:8080/api/rules \
 
 1. **Create pattern rule**:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "consecutive-alerts",
@@ -203,7 +203,7 @@ curl -X POST http://localhost:8080/api/rules \
 
 1. **Create aggregation rule**:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "event-count",
@@ -237,7 +237,7 @@ curl -X POST http://localhost:8080/api/rules \
 
 1. **Create initial rule**:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "threshold-test",
@@ -252,7 +252,7 @@ curl -X POST http://localhost:8080/api/rules \
 
 4. **Update rule** with new threshold:
 ```bash
-curl -X PUT http://localhost:8080/api/rules/1 \
+curl -X PUT http://localhost:8081/api/rules/1 \
   -H "Content-Type: application/json" \
   -d '{
     "name": "threshold-test",
@@ -284,7 +284,7 @@ curl -X PUT http://localhost:8080/api/rules/1 \
 
 1. **Try to create rule with invalid EPL**:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "invalid-rule",
@@ -304,7 +304,7 @@ curl -X POST http://localhost:8080/api/rules \
 
 5. **Fix the rule**:
 ```bash
-curl -X PUT http://localhost:8080/api/rules/X \
+curl -X PUT http://localhost:8081/api/rules/X \
   -H "Content-Type: application/json" \
   -d '{
     "name": "invalid-rule",
@@ -365,40 +365,40 @@ mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.engine.CepEngineApplication"
 ### Create Test Rules
 ```bash
 # Simple filter
-curl -X POST http://localhost:8080/api/rules -H "Content-Type: application/json" \
+curl -X POST http://localhost:8081/api/rules -H "Content-Type: application/json" \
   -d '{"name":"test1","eplQuery":"select * from Event(value > 50)"}'
 
 # Type filter
-curl -X POST http://localhost:8080/api/rules -H "Content-Type: application/json" \
+curl -X POST http://localhost:8081/api/rules -H "Content-Type: application/json" \
   -d '{"name":"test2","eplQuery":"select * from Event(type=\"error\")"}'
 
 # Pattern
-curl -X POST http://localhost:8080/api/rules -H "Content-Type: application/json" \
+curl -X POST http://localhost:8081/api/rules -H "Content-Type: application/json" \
   -d '{"name":"test3","eplQuery":"select * from pattern [every a=Event -> b=Event]"}'
 ```
 
 ### List Rules
 ```bash
 # All rules
-curl http://localhost:8080/api/rules
+curl http://localhost:8081/api/rules
 
 # Active only
-curl http://localhost:8080/api/rules/active
+curl http://localhost:8081/api/rules/active
 
 # Specific rule
-curl http://localhost:8080/api/rules/1
+curl http://localhost:8081/api/rules/1
 ```
 
 ### Manage Rules
 ```bash
 # Deactivate
-curl -X PATCH http://localhost:8080/api/rules/1/deactivate
+curl -X PATCH http://localhost:8081/api/rules/1/deactivate
 
 # Activate
-curl -X PATCH http://localhost:8080/api/rules/1/activate
+curl -X PATCH http://localhost:8081/api/rules/1/activate
 
 # Delete
-curl -X DELETE http://localhost:8080/api/rules/1
+curl -X DELETE http://localhost:8081/api/rules/1
 ```
 
 ## Automated Test Script
@@ -408,7 +408,7 @@ Save as `test-system.sh`:
 ```bash
 #!/bin/bash
 
-API_URL="http://localhost:8080/api/rules"
+API_URL="http://localhost:8081/api/rules"
 
 echo "=== Testing CEP System ==="
 
@@ -455,7 +455,7 @@ chmod +x test-system.sh
 ```bash
 # Create 100 rules
 for i in {1..100}; do
-  curl -X POST http://localhost:8080/api/rules \
+  curl -X POST http://localhost:8081/api/rules \
     -H "Content-Type: application/json" \
     -d "{\"name\":\"rule$i\",\"eplQuery\":\"select * from Event(value > $i)\"}"
 done
@@ -483,7 +483,7 @@ done
 
 ```bash
 # Check if database is accessible
-curl http://localhost:8080/h2-console
+curl http://localhost:8081/h2-console
 
 # Query rules directly
 # JDBC URL: jdbc:h2:./data/cep-rules
@@ -512,10 +512,10 @@ docker exec -it kafka kafka-console-consumer \
 
 ```bash
 # Check API is responding
-curl http://localhost:8080/api/rules
+curl http://localhost:8081/api/rules
 
 # Check H2 console
-curl http://localhost:8080/h2-console
+curl http://localhost:8081/h2-console
 ```
 
 ## Expected Outputs

@@ -13,32 +13,32 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
-    @Bean
-    public OpenAPI ruleManagementOpenAPI() {
-        Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080");
-        localServer.setDescription("Local Development Server");
+        @Bean
+        public OpenAPI ruleManagementOpenAPI() {
+                Server localServer = new Server();
+                localServer.setUrl("http://localhost:8081");
+                localServer.setDescription("Local Development Server");
 
-        Contact contact = new Contact();
-        contact.setName("CEP Team");
-        contact.setEmail("cep@example.com");
+                Contact contact = new Contact();
+                contact.setName("CEP Team");
+                contact.setEmail("cep@example.com");
 
-        License license = new License()
-                .name("MIT License")
-                .url("https://opensource.org/licenses/MIT");
+                License license = new License()
+                                .name("MIT License")
+                                .url("https://opensource.org/licenses/MIT");
 
-        Info info = new Info()
-                .title("CEP Rule Management API")
-                .version("1.0.0")
-                .description("REST API for managing Complex Event Processing (CEP) rules. " +
-                        "This API allows you to create, update, delete, and manage EPL (Event Processing Language) rules "
-                        +
-                        "that are processed by the Esper CEP engine.")
-                .contact(contact)
-                .license(license);
+                Info info = new Info()
+                                .title("CEP Rule Management API")
+                                .version("1.0.0")
+                                .description("REST API for managing Complex Event Processing (CEP) rules. " +
+                                                "This API allows you to create, update, delete, and manage EPL (Event Processing Language) rules "
+                                                +
+                                                "that are processed by the Esper CEP engine.")
+                                .contact(contact)
+                                .license(license);
 
-        return new OpenAPI()
-                .info(info)
-                .servers(List.of(localServer));
-    }
+                return new OpenAPI()
+                                .info(info)
+                                .servers(List.of(localServer));
+        }
 }

@@ -40,8 +40,8 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=gemoc.mbdo.cep.api.RuleManagemen
 You should see:
 ```
 === Rule Management API Started ===
-API available at: http://localhost:8080
-H2 Console: http://localhost:8080/h2-console
+API available at: http://localhost:8081
+H2 Console: http://localhost:8081/h2-console
 ```
 
 ### 4. Start CEP Engine (Terminal 2)
@@ -65,7 +65,7 @@ You should see:
 ### 5. Create a Rule via API (Terminal 3)
 
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-value-alerts",
@@ -96,13 +96,13 @@ mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.KafkaEventProducer"
 ### 7. View All Rules
 
 ```bash
-curl http://localhost:8080/api/rules
+curl http://localhost:8081/api/rules
 ```
 
 ### 8. Deactivate a Rule
 
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/deactivate
+curl -X PATCH http://localhost:8081/api/rules/1/deactivate
 ```
 
 **What happens:**
@@ -117,7 +117,7 @@ curl -X PATCH http://localhost:8080/api/rules/1/deactivate
 
 ```bash
 # Rule 1: High-value alerts
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-value-alerts",
@@ -126,7 +126,7 @@ curl -X POST http://localhost:8080/api/rules \
   }'
 
 # Rule 2: Error events
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "error-events",
@@ -135,7 +135,7 @@ curl -X POST http://localhost:8080/api/rules \
   }'
 
 # Rule 3: Consecutive alerts pattern
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "consecutive-alerts",
@@ -144,7 +144,7 @@ curl -X POST http://localhost:8080/api/rules \
   }'
 
 # Rule 4: Aggregation by type
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "event-count-by-type",
@@ -156,13 +156,13 @@ curl -X POST http://localhost:8080/api/rules \
 ### List Active Rules
 
 ```bash
-curl http://localhost:8080/api/rules/active
+curl http://localhost:8081/api/rules/active
 ```
 
 ### Update a Rule
 
 ```bash
-curl -X PUT http://localhost:8080/api/rules/1 \
+curl -X PUT http://localhost:8081/api/rules/1 \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-value-alerts",
@@ -174,13 +174,13 @@ curl -X PUT http://localhost:8080/api/rules/1 \
 ### Get Specific Rule
 
 ```bash
-curl http://localhost:8080/api/rules/1
+curl http://localhost:8081/api/rules/1
 ```
 
 ### Delete a Rule
 
 ```bash
-curl -X DELETE http://localhost:8080/api/rules/1
+curl -X DELETE http://localhost:8081/api/rules/1
 ```
 
 ## Testing the System
@@ -189,7 +189,7 @@ curl -X DELETE http://localhost:8080/api/rules/1
 
 1. Create rule:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "test-filter",
@@ -210,7 +210,7 @@ mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.KafkaEventProducer"
 
 1. Create pattern rule:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "alert-error-pattern",
@@ -224,14 +224,14 @@ curl -X POST http://localhost:8080/api/rules \
 
 1. Deactivate rule:
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/deactivate
+curl -X PATCH http://localhost:8081/api/rules/1/deactivate
 ```
 
 2. Send events - no matches should occur
 
 3. Reactivate rule:
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/activate
+curl -X PATCH http://localhost:8081/api/rules/1/activate
 ```
 
 4. Send events - matches should occur again
@@ -240,7 +240,7 @@ curl -X PATCH http://localhost:8080/api/rules/1/activate
 
 ### View Database
 
-1. Open browser: http://localhost:8080/h2-console
+1. Open browser: http://localhost:8081/h2-console
 2. JDBC URL: `jdbc:h2:./data/cep-rules`
 3. Username: `sa`
 4. Password: (leave empty)
@@ -264,7 +264,7 @@ SELECT * FROM rules WHERE active = true;
 ┌─────────────────┐
 │  Spring Boot    │
 │      API        │
-│   (Port 8080)   │
+│   (Port 8081)   │
 └──────┬──────────┘
        │ JDBC
        ▼
@@ -291,7 +291,7 @@ SELECT * FROM rules WHERE active = true;
 ## Troubleshooting
 
 ### API won't start
-- Check port 8080 is available: `lsof -i :8080`
+- Check port 8081 is available: `lsof -i :8081`
 - Check Java version: `java -version` (need 11+)
 
 ### CEP Engine won't start
@@ -301,10 +301,10 @@ SELECT * FROM rules WHERE active = true;
 ### Rules not deploying
 - Check CEP Engine logs for errors
 - Verify rule syntax is valid EPL
-- Check database: http://localhost:8080/h2-console
+- Check database: http://localhost:8081/h2-console
 
 ### Events not matching
-- Verify rule is active: `curl http://localhost:8080/api/rules/active`
+- Verify rule is active: `curl http://localhost:8081/api/rules/active`
 - Check event format matches EPL query
 - Verify Kafka consumer is running (check Terminal 2)
 

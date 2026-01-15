@@ -7,7 +7,7 @@ You now have a **clean separation** between rule management and event processing
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                    SPRING BOOT API                            │
-│                   (Port 8080)                                 │
+│                   (Port 8081)                                 │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │  REST Endpoints for Rule Management                     │  │
 │  │  - Create, Read, Update, Delete rules                   │  │
@@ -117,7 +117,7 @@ CREATE TABLE rules (
 
 1. **User creates rule via API**:
    ```bash
-   curl -X POST http://localhost:8080/api/rules \
+   curl -X POST http://localhost:8081/api/rules \
      -H "Content-Type: application/json" \
      -d '{
        "name": "high-value-alerts",
@@ -180,7 +180,7 @@ CREATE TABLE rules (
 
 **Create Rule**:
 ```bash
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "error-events",
@@ -192,12 +192,12 @@ curl -X POST http://localhost:8080/api/rules \
 
 **List All Rules**:
 ```bash
-curl http://localhost:8080/api/rules
+curl http://localhost:8081/api/rules
 ```
 
 **Deactivate Rule**:
 ```bash
-curl -X PATCH http://localhost:8080/api/rules/1/deactivate
+curl -X PATCH http://localhost:8081/api/rules/1/deactivate
 ```
 
 ## Running the Complete System
@@ -215,7 +215,7 @@ mvn spring-boot:run -Dspring-boot.run.mainClass=gemoc.mbdo.cep.api.RuleManagemen
 Wait for:
 ```
 === Rule Management API Started ===
-API available at: http://localhost:8080
+API available at: http://localhost:8081
 ```
 
 ### Step 3: Start CEP Engine (Terminal 2)
@@ -233,7 +233,7 @@ Wait for:
 ### Step 4: Create Rules (Terminal 3)
 ```bash
 # Create a simple filter rule
-curl -X POST http://localhost:8080/api/rules \
+curl -X POST http://localhost:8081/api/rules \
   -H "Content-Type: application/json" \
   -d '{
     "name": "high-value-alerts",
@@ -266,7 +266,7 @@ spring:
   datasource:
     url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
 server:
-  port: 8080
+  port: 8081
 ```
 
 ### CEP Engine (`CepEngineApplication.java`)
@@ -349,7 +349,7 @@ public interface RuleService {
 - Check database connection
 
 ### Events not matching
-- Verify rule is active: `curl http://localhost:8080/api/rules/active`
+- Verify rule is active: `curl http://localhost:8081/api/rules/active`
 - Check event format matches EPL query
 - Verify Kafka consumer is running
 
@@ -358,9 +358,9 @@ public interface RuleService {
 - Delete `./data/cep-rules.mv.db`
 - Restart API first, then Engine
 
-### Port 8080 already in use
+### Port 8081 already in use
 - Change port in `application.yml`
-- Or stop other application using port 8080
+- Or stop other application using port 8081
 
 ## Summary
 
