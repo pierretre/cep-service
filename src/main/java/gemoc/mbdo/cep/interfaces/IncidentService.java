@@ -8,6 +8,5 @@ public interface IncidentService
 {
     List<Incident> getIncidents();
 
-
-
+    Incident getIncidentById(long id);
 }

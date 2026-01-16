@@ -18,12 +18,18 @@ import java.util.Properties;
 public class CepEngineApplication {
 
     public static void main(String[] args) {
+
         System.out.println("\n╔════════════════════════════════════════╗");
         System.out.println("║     CEP ENGINE APPLICATION             ║");
         System.out.println("╚════════════════════════════════════════╝\n");
 
         // Load configuration
         Properties config = loadConfiguration();
+
+        // Debug: print all loaded properties
+        System.out.println("=== Loaded Configuration Properties ===");
+        config.forEach((key, value) -> System.out.println(key + " = " + value));
+        System.out.println("========================================\n");
 
         String jdbcUrl = config.getProperty("cep.database.url", "jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE");
         String dbUsername = config.getProperty("cep.database.username", "sa");
@@ -78,30 +84,67 @@ public class CepEngineApplication {
     private static Properties loadConfiguration() {
         Properties props = new Properties();
 
-        // Try to load from application.yml (convert YAML to properties format)
-        try (InputStream input = new FileInputStream("src/main/resources/application.yml")) {
-            // Simple YAML parser for our specific format
+        // Try to load from classpath (works in both IDE and Docker)
+        try (InputStream input = CepEngineApplication.class.getClassLoader().getResourceAsStream("application.yml")) {
+            if (input == null) {
+                System.out.println("Could not find application.yml in classpath, using defaults");
+                return props;
+            }
+
+            // Simple YAML parser for our specific CEP configuration section
             java.util.Scanner scanner = new java.util.Scanner(input);
-            String currentPrefix = "";
+            boolean inCepSection = false;
+            boolean inDatabaseSection = false;
+            boolean inKafkaSection = false;
 
             while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
+                String line = scanner.nextLine();
+                String trimmed = line.trim();
 
-                if (line.isEmpty() || line.startsWith("#")) {
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
                     continue;
                 }
 
-                if (line.startsWith("cep:")) {
-                    currentPrefix = "cep";
-                } else if (line.startsWith("database:") && currentPrefix.equals("cep")) {
-                    currentPrefix = "cep.database";
-                } else if (line.startsWith("kafka:") && currentPrefix.equals("cep")) {
-                    currentPrefix = "cep.kafka";
-                } else if (line.contains(":") && !line.endsWith(":")) {
-                    String[] parts = line.split(":", 2);
+                // Check for main sections
+                if (trimmed.equals("cep:")) {
+                    inCepSection = true;
+                    inDatabaseSection = false;
+                    inKafkaSection = false;
+                    continue;
+                } else if (!line.startsWith(" ") && !line.startsWith("\t")) {
+                    // Reset all sections if we hit a top-level key
+                    inCepSection = false;
+                    inDatabaseSection = false;
+                    inKafkaSection = false;
+                    continue;
+                }
+
+                // Check for subsections within cep
+                if (inCepSection) {
+                    if (trimmed.equals("database:")) {
+                        inDatabaseSection = true;
+                        inKafkaSection = false;
+                        continue;
+                    } else if (trimmed.equals("kafka:")) {
+                        inKafkaSection = true;
+                        inDatabaseSection = false;
+                        continue;
+                    }
+                }
+
+                // Parse key-value pairs
+                if (trimmed.contains(":") && !trimmed.endsWith(":")) {
+                    String[] parts = trimmed.split(":", 2);
                     String key = parts[0].trim();
                     String value = parts[1].trim();
-                    props.setProperty(currentPrefix + "." + key, value);
+
+                    if (inDatabaseSection) {
+                        props.setProperty("cep.database." + key, value);
+                    } else if (inKafkaSection) {
+                        props.setProperty("cep.kafka." + key, value);
+                    } else if (inCepSection) {
+                        props.setProperty("cep." + key, value);
+                    }
                 }
             }
             scanner.close();
@@ -113,4 +156,5 @@ public class CepEngineApplication {
 
         return props;
     }
+
 }

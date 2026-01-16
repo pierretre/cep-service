@@ -43,7 +43,7 @@ cep:
     password: 
   kafka:
     bootstrap-servers: localhost:9092
-    topic: events
+    topic: REN_1V_01_VGRSystemModel
     group-id: cep-engine-consumer
   rule-sync-interval-ms: 5000
 

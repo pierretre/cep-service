@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.print.attribute.standard.Severity;
 import java.time.LocalDateTime;
 
 @Setter
@@ -26,7 +25,10 @@ public class Incident {
     @Column(nullable = false)
     private IncidentSeverity severity;
 
-    private boolean ended;
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -36,11 +38,11 @@ public class Incident {
 
     public Incident() {}
 
-    public Incident(String message, Rule rule, IncidentSeverity severity) {
+    public Incident(String message, Rule rule, IncidentSeverity severity, LocalDateTime startTime, boolean ended) {
         this.message = message;
         this.rule = rule;
         this.severity = severity;
-        this.ended = false;
+        this.startTime = startTime;
         this.createdAt = LocalDateTime.now();
     }
 }
