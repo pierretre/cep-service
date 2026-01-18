@@ -10,6 +10,7 @@ import com.espertech.esper.runtime.client.*;
 import gemoc.mbdo.cep.interfaces.CepEngine;
 import gemoc.mbdo.cep.engine.model.Event;
 import gemoc.mbdo.cep.shared.model.Rule;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Esper CEP Engine implementation that manages rule deployment and event
  * processing
  */
+@Slf4j
 public class EsperCepEngineImpl implements CepEngine {
 
     private final EPCompiler compiler;
@@ -39,32 +41,14 @@ public class EsperCepEngineImpl implements CepEngine {
     }
 
     @Override
-    public void checkPattern(String pattern) throws Exception {
-        compile(compiler, pattern, configuration);
-    }
-
-    @Override
-    public void registerPattern(String pattern, String queryName) throws Exception {
-        String epl = "@name('" + queryName + "') " + pattern;
-        EPCompiled compiled = compile(compiler, epl, configuration);
-        EPDeployment deployment = runtime.getDeploymentService().deploy(compiled);
-
-        EPStatement statement = runtime.getDeploymentService()
-                .getStatement(deployment.getDeploymentId(), queryName);
-
-        statement.addListener((newEvents, oldEvents, stmt, rt) -> {
-            for (com.espertech.esper.common.client.EventBean event : newEvents) {
-                System.out.println("[" + queryName + "] Pattern matched: " + formatEvent(event));
-            }
-        });
-
-        deployedRules.put(queryName, new Rule(queryName, pattern, deployment.getDeploymentId()));
-        System.out.println("✓ Registered pattern: " + queryName);
+    public void checkRule(Rule rule) throws Exception {
+        // TODO
     }
 
     /**
      * Deploy a rule from the database
      */
+    @Override
     public void deployRule(Rule rule) throws Exception {
         if (deployedRules.containsKey(rule.getName())) {
             System.out.println("Rule '" + rule.getName() + "' already deployed, skipping");
@@ -136,6 +120,7 @@ public class EsperCepEngineImpl implements CepEngine {
     private EPCompiled compile(EPCompiler compiler, String epl, Configuration configuration)
             throws EPCompileException {
         CompilerArguments args = new CompilerArguments(configuration);
+        log.info(epl);
         return compiler.compile(epl, args);
     }
 

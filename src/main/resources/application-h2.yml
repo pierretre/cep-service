@@ -1,0 +1,60 @@
+# H2 Configuration Profile (for development/testing)
+# Use this profile if you don't want to set up PostgreSQL
+# Run with: mvn spring-boot:run -Dspring-boot.run.profiles=h2
+
+spring:
+  application:
+    name: rule-management-api
+  
+  datasource:
+    url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8081
+
+# OpenAPI/Swagger Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+
+# CEP Engine Configuration
+cep:
+  database:
+    url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
+    username: sa
+    password: 
+    # H2 doesn't support LISTEN/NOTIFY, use polling
+    use-postgres-notify: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    topic: events
+    group-id: cep-engine-consumer
+  # Polling interval for H2
+  rule-sync-interval-ms: 5000
+
+logging:
+  level:
+    root: INFO
+    gemoc.mbdo.cep: DEBUG

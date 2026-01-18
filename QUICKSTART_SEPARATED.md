@@ -83,9 +83,7 @@ curl -X POST http://localhost:8081/api/rules \
 
 ### 6. Send Test Events (Terminal 4)
 
-```bash
-mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.KafkaEventProducer"
-```
+Send events to the Kafka topic.
 
 **What happens:**
 - Events are sent to Kafka
@@ -199,10 +197,7 @@ curl -X POST http://localhost:8081/api/rules \
 
 2. Wait 5 seconds for rule to deploy
 
-3. Send events:
-```bash
-mvn exec:java -Dexec.mainClass="gemoc.mbdo.cep.KafkaEventProducer"
-```
+3. Send events to the Kafka topic
 
 4. Watch Terminal 2 for matches
 
@@ -323,7 +318,6 @@ SELECT * FROM rules WHERE active = true;
 
 ## Stopping the System
 
-1. Stop event producer (Ctrl+C in Terminal 4)
-2. Stop CEP Engine (Ctrl+C in Terminal 2)
-3. Stop Spring Boot API (Ctrl+C in Terminal 1)
-4. Stop Kafka: `docker-compose down`
+1. Stop CEP Engine (Ctrl+C in Terminal 2)
+2. Stop Spring Boot API (Ctrl+C in Terminal 1)
+3. Stop Kafka: `docker-compose down`

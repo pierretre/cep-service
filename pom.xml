@@ -89,6 +89,13 @@
             <artifactId>h2</artifactId>
             <version>2.2.224</version>
         </dependency>
+        
+        <!-- PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.1</version>
+        </dependency>
 
         <!-- JAXB for Java 11+ -->
         <dependency>

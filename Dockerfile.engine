@@ -5,18 +5,12 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests
-
-# Extract the JAR in the builder stage where we have JDK tools
-FROM eclipse-temurin:21-jdk AS extractor
-WORKDIR /app
-COPY --from=builder /app/target/cep-dynamic-1.0-SNAPSHOT.jar app.jar
-RUN jar -xf app.jar && rm app.jar
+RUN cd target && jar -xf cep-dynamic-1.0-SNAPSHOT.jar
 
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
-# Copy the extracted JAR contents
-COPY --from=extractor /app /app
+COPY --from=builder /app/target/BOOT-INF/lib /app/lib
+COPY --from=builder /app/target/BOOT-INF/classes /app/classes
 
-# Run the standalone CEP engine with proper classpath
-CMD ["java", "-cp", "/app/BOOT-INF/classes:/app/BOOT-INF/lib/*", "gemoc.mbdo.cep.engine.CepEngineApplication"]
+CMD ["java", "-cp", "/app/classes:/app/lib/*", "gemoc.mbdo.cep.engine.CepEngineApplication"]

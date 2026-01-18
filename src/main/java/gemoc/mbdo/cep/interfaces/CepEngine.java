@@ -1,7 +1,9 @@
 package gemoc.mbdo.cep.interfaces;
 
-public interface CepEngine {
-    void checkPattern(String pattern) throws Exception;
+import gemoc.mbdo.cep.shared.model.Rule;
 
-    void registerPattern(String pattern, String queryName) throws Exception;
+public interface CepEngine {
+    void checkRule(Rule rule) throws Exception;
+
+    void deployRule(Rule rule) throws Exception;
 }

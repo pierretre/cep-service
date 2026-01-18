@@ -3,10 +3,17 @@ spring:
     name: rule-management-api
   
   datasource:
-    url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: 
+    # H2 Configuration (for development)
+    # url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
+    # driver-class-name: org.h2.Driver
+    # username: sa
+    # password: 
+    
+    # PostgreSQL Configuration (for production with LISTEN/NOTIFY)
+    url: jdbc:postgresql://localhost:5432/cep_rules
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
   
   jpa:
     hibernate:
@@ -15,10 +22,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2-console
 
 server:
@@ -38,13 +46,17 @@ springdoc:
 # CEP Engine Configuration
 cep:
   database:
-    url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
-    username: sa
-    password: 
+    # PostgreSQL Configuration
+    url: jdbc:postgresql://localhost:5432/cep_rules
+    username: postgres
+    password: postgres
+    # Use LISTEN/NOTIFY instead of polling
+    use-postgres-notify: true
   kafka:
     bootstrap-servers: localhost:9092
     topic: REN_1V_01_VGRSystemModel
     group-id: cep-engine-consumer
+  # Polling interval (only used if use-postgres-notify is false)
   rule-sync-interval-ms: 5000
 
 logging:

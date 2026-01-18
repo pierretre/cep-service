@@ -25,10 +25,10 @@ The system consists of two independent applications:
                                     │
                                     │ Polls every 5s
                                     ▼
-┌─────────────────┐         ┌──────────────┐
-│  Kafka Producer │────────▶│    Kafka     │
-│   (Test Tool)   │         │   (Events)   │
-└─────────────────┘         └──────────────┘
+                            ┌──────────────┐
+                            │    Kafka     │
+                            │   (Events)   │
+                            └──────────────┘
                                     │
                                     │ Consumes
                                     ▼
@@ -98,9 +98,7 @@ curl -X POST http://localhost:8081/api/rules \
 
 ### 6. Send Test Events
 
-```bash
-java -cp target/cep-demo-1.0-SNAPSHOT.jar gemoc.mbdo.cep.KafkaEventProducer
-```
+Send events to the Kafka topic to test the system.
 
 ## Project Structure
 
@@ -133,8 +131,7 @@ src/main/java/gemoc/mbdo/cep/
 │   ├── CepEngine.java
 │   └── RuleService.java
 ├── EventSerializer.java          # Kafka serialization
-├── EventDeserializer.java
-└── KafkaEventProducer.java      # Test utility
+└── EventDeserializer.java
 ```
 
 ## API Endpoints
