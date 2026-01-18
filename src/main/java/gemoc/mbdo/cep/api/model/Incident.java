@@ -1,9 +1,10 @@
-package gemoc.mbdo.cep.shared.model;
+package gemoc.mbdo.cep.api.model;
+
+import jakarta.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Setter

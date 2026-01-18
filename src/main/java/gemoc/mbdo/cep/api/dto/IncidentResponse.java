@@ -1,7 +1,7 @@
 package gemoc.mbdo.cep.api.dto;
 
-import gemoc.mbdo.cep.shared.model.Incident;
-import gemoc.mbdo.cep.shared.model.IncidentSeverity;
+import gemoc.mbdo.cep.api.model.Incident;
+import gemoc.mbdo.cep.api.model.IncidentSeverity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;

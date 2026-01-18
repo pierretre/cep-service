@@ -2,6 +2,20 @@ spring:
   application:
     name: rule-management-api
   
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: cep-engine-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: gemoc.mbdo.cep.api.model.Event
+        spring.json.use.type.headers: false
+  
   datasource:
     # H2 Configuration (for development)
     # url: jdbc:h2:./data/cep-rules;AUTO_SERVER=TRUE
@@ -43,23 +57,6 @@ springdoc:
     tagsSorter: alpha
     tryItOutEnabled: true
 
-# CEP Engine Configuration
-cep:
-  database:
-    # PostgreSQL Configuration
-    url: jdbc:postgresql://localhost:5432/cep_rules
-    username: postgres
-    password: postgres
-    # Use LISTEN/NOTIFY instead of polling
-    use-postgres-notify: true
-  kafka:
-    bootstrap-servers: localhost:9092
-    topic: REN_1V_01_VGRSystemModel
-    group-id: cep-engine-consumer
-  # Polling interval (only used if use-postgres-notify is false)
-  rule-sync-interval-ms: 5000
-
 logging:
   level:
     root: INFO
-    gemoc.mbdo.cep: DEBUG

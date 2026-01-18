@@ -1,7 +1,7 @@
 package gemoc.mbdo.cep.api.controller;
 
 import gemoc.mbdo.cep.api.dto.IncidentResponse;
-import gemoc.mbdo.cep.shared.model.Incident;
+import gemoc.mbdo.cep.api.model.Incident;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

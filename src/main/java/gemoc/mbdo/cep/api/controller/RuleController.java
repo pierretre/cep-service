@@ -3,7 +3,7 @@ package gemoc.mbdo.cep.api.controller;
 import gemoc.mbdo.cep.api.dto.RuleRequest;
 import gemoc.mbdo.cep.api.dto.RuleResponse;
 import gemoc.mbdo.cep.api.service.RuleServiceImpl;
-import gemoc.mbdo.cep.shared.model.Rule;
+import gemoc.mbdo.cep.api.model.Rule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,7 +91,7 @@ public class RuleController {
             @ApiResponse(responseCode = "400", description = "Invalid input or rule already exists")
     })
     public ResponseEntity<?> createRule(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Rule to create", required = true, content = @Content(schema = @Schema(implementation = RuleRequest.class))) @Valid @RequestBody RuleRequest request) {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Rule to create", required = true, content = @Content(schema = @Schema(implementation = RuleRequest.class))) @RequestBody RuleRequest request) {
         try {
             Rule rule = new Rule(request.getName(), request.getEplQuery(), request.getDescription());
             rule.setActive(request.getActive());
@@ -112,7 +111,7 @@ public class RuleController {
     })
     public ResponseEntity<?> updateRule(
             @Parameter(description = "ID of the rule to update") @PathVariable Long id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated rule data", required = true, content = @Content(schema = @Schema(implementation = RuleRequest.class))) @Valid @RequestBody RuleRequest request) {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated rule data", required = true, content = @Content(schema = @Schema(implementation = RuleRequest.class))) @RequestBody RuleRequest request) {
         try {
             Rule updatedRule = new Rule(request.getName(), request.getEplQuery(), request.getDescription());
             updatedRule.setActive(request.getActive());

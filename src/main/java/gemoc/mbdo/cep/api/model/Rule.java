@@ -1,9 +1,15 @@
-package gemoc.mbdo.cep.shared.model;
+package gemoc.mbdo.cep.api.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Setter
@@ -47,5 +53,4 @@ public class Rule {
         this.active = true;
         this.createdAt = LocalDateTime.now();
     }
-
 }

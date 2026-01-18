@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.interfaces;
 
-import gemoc.mbdo.cep.shared.model.Incident;
+import gemoc.mbdo.cep.api.model.Incident;
 
 import java.util.List;
 

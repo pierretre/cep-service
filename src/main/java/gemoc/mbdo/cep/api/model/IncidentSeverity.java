@@ -1,4 +1,4 @@
-package gemoc.mbdo.cep.shared.model;
+package gemoc.mbdo.cep.api.model;
 
 public enum IncidentSeverity {
     Critical,

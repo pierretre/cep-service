@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.api.repository;
 
-import gemoc.mbdo.cep.shared.model.Incident;
+import gemoc.mbdo.cep.api.model.Incident;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;

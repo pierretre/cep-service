@@ -1,4 +1,4 @@
-package gemoc.mbdo.cep.engine;
+package gemoc.mbdo.cep.api.esper;
 
 import com.espertech.esper.common.client.EPCompiled;
 import com.espertech.esper.common.client.configuration.Configuration;
@@ -8,8 +8,8 @@ import com.espertech.esper.compiler.client.EPCompiler;
 import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.*;
 import gemoc.mbdo.cep.interfaces.CepEngine;
-import gemoc.mbdo.cep.engine.model.Event;
-import gemoc.mbdo.cep.shared.model.Rule;
+import gemoc.mbdo.cep.api.model.Rule;
+import gemoc.mbdo.cep.api.model.Event;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;

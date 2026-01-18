@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.api.repository;
 
-import gemoc.mbdo.cep.shared.model.Rule;
+import gemoc.mbdo.cep.api.model.Rule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

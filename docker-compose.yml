@@ -3,8 +3,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: cep-postgres
-    ports:
-      - "5432:5432"
+    network_mode: "host"
     environment:
       POSTGRES_DB: cep_rules
       POSTGRES_USER: postgres
@@ -34,29 +33,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    restart: always
-
-  engine:
-    build:
-      context: .
-      dockerfile: Dockerfile.engine
-    container_name: cep-engine
-    network_mode: "host"
-    environment:
-      - CEP_DATABASE_URL=jdbc:postgresql://localhost:5432/cep_rules
-      - CEP_DATABASE_USERNAME=postgres
-      - CEP_DATABASE_PASSWORD=postgres
-      - CEP_DATABASE_USE_POSTGRES_NOTIFY=true
-      - KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-      - KAFKA_TOPIC=events
-      - KAFKA_GROUP_ID=cep-engine-consumer
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      postgres:
-        condition: service_healthy
-      api:
-        condition: service_started
     restart: always
 
 volumes:

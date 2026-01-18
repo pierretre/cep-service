@@ -1,6 +1,6 @@
 package gemoc.mbdo.cep.interfaces;
 
-import gemoc.mbdo.cep.shared.model.Rule;
+import gemoc.mbdo.cep.api.model.Rule;
 
 public interface CepEngine {
     void checkRule(Rule rule) throws Exception;

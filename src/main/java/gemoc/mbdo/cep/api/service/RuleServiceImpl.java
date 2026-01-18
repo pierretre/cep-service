@@ -2,7 +2,7 @@ package gemoc.mbdo.cep.api.service;
 
 import gemoc.mbdo.cep.api.repository.RuleRepository;
 import gemoc.mbdo.cep.interfaces.RuleService;
-import gemoc.mbdo.cep.shared.model.Rule;
+import gemoc.mbdo.cep.api.model.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

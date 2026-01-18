@@ -2,7 +2,7 @@ package gemoc.mbdo.cep.api.service;
 
 import gemoc.mbdo.cep.api.repository.IncidentRepository;
 import gemoc.mbdo.cep.interfaces.IncidentService;
-import gemoc.mbdo.cep.shared.model.Incident;
+import gemoc.mbdo.cep.api.model.Incident;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

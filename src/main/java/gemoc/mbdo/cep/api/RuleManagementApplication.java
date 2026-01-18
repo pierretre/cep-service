@@ -2,8 +2,6 @@ package gemoc.mbdo.cep.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
@@ -13,9 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * It stores rules in a database that the CEP engine polls for updates.
  */
 @SpringBootApplication
-@EntityScan(basePackages = "gemoc.mbdo.cep.shared.model")
 @EnableJpaRepositories(basePackages = "gemoc.mbdo.cep.api.repository")
-@ComponentScan(basePackages = { "gemoc.mbdo.cep.api", "gemoc.mbdo.cep.shared" })
 public class RuleManagementApplication {
 
     public static void main(String[] args) {
