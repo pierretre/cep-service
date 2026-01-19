@@ -7,10 +7,12 @@ import { Incident, IncidentSeverity } from './models';
 import { initFlowbite } from 'flowbite';
 import { IncidentService } from './services/incident.service';
 import { Subscription } from 'rxjs';
+import { RuleFormComponent } from './components/rule-form/rule-form.component';
+import { IncidentsChartComponent } from './components/incidents-chart/incidents-chart.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, RuleFormComponent, IncidentsChartComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -25,6 +27,9 @@ export class AppComponent implements OnInit, OnDestroy {
   IncidentSeverity = IncidentSeverity;
 
   incidents: Incident[] = [];
+
+  // Rule form state
+  showRulePanel = false;
 
   get filteredIncidents(): Incident[] {
     let filtered = this.incidents;
@@ -91,6 +96,20 @@ export class AppComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedSeverity = '';
+  }
+
+  // Rule panel methods
+  toggleRulePanel(): void {
+    this.showRulePanel = !this.showRulePanel;
+  }
+
+  onRulePanelClose(): void {
+    this.showRulePanel = false;
+  }
+
+  onRuleCreated(): void {
+    // Optionally refresh incidents or show a notification
+    console.log('Rule created, you may want to refresh data');
   }
 
   // Connection status for SSE

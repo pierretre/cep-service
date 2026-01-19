@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Incident, fromIncident } from '../models';
 
@@ -20,14 +21,18 @@ export class IncidentService {
      * Get all incidents from the API
      */
     getAllIncidents(): Observable<Incident[]> {
-        return this.http.get<Incident[]>(`${environment.apiUrl}/incidents`);
+        return this.http.get<any[]>(`${environment.apiUrl}/incidents`).pipe(
+            map(incidents => incidents.map(fromIncident))
+        );
     }
 
     /**
      * Get a specific incident by ID
      */
     getIncidentById(id: number): Observable<Incident> {
-        return this.http.get<Incident>(`${environment.apiUrl}/incidents/${id}`);
+        return this.http.get<any>(`${environment.apiUrl}/incidents/${id}`).pipe(
+            map(fromIncident)
+        );
     }
 
     /**

@@ -8,5 +8,7 @@ public interface CepEngine {
 
     void deployRule(Rule rule) throws Exception;
 
+    void undeployRule(String ruleName) throws Exception;
+
     void sendEvent(Event event);
 }

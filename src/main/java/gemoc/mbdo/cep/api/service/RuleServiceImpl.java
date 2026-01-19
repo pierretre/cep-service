@@ -2,6 +2,7 @@ package gemoc.mbdo.cep.api.service;
 
 import gemoc.mbdo.cep.api.repository.RuleRepository;
 import gemoc.mbdo.cep.interfaces.RuleService;
+import gemoc.mbdo.cep.interfaces.CepEngine;
 import gemoc.mbdo.cep.api.model.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,15 +17,38 @@ public class RuleServiceImpl implements RuleService {
     @Autowired
     private RuleRepository ruleRepository;
 
+    @Autowired
+    private CepEngine cepEngine;
+
     @Override
     @Transactional
     public void addRule(Rule rule) {
         if (ruleRepository.existsByName(rule.getName())) {
             throw new IllegalArgumentException("Rule with name '" + rule.getName() + "' already exists");
         }
+
+        // First, validate the rule by checking if it compiles with the CEP engine
+        try {
+            cepEngine.checkRule(rule);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid EPL query: " + e.getMessage(), e);
+        }
+
         rule.setCreatedAt(LocalDateTime.now());
         rule.setActive(true);
-        ruleRepository.save(rule);
+        Rule savedRule = ruleRepository.save(rule);
+
+        // Deploy the rule to the CEP engine if it's active
+        if (savedRule.getActive()) {
+            try {
+                cepEngine.deployRule(savedRule);
+                // Update the rule with the deployment ID
+                ruleRepository.save(savedRule);
+            } catch (Exception e) {
+                // If deployment fails, rollback the transaction by throwing a runtime exception
+                throw new RuntimeException("Failed to deploy rule to CEP engine: " + e.getMessage(), e);
+            }
+        }
     }
 
     @Override
@@ -32,6 +56,17 @@ public class RuleServiceImpl implements RuleService {
     public void removeRule(Rule rule) throws Exception {
         Rule existing = ruleRepository.findByName(rule.getName())
                 .orElseThrow(() -> new Exception("Rule not found: " + rule.getName()));
+
+        // Undeploy the rule from CEP engine if it's active
+        if (existing.getActive()) {
+            try {
+                cepEngine.undeployRule(existing.getName());
+            } catch (Exception e) {
+                // Log the error but continue with deletion
+                System.err.println("Warning: Failed to undeploy rule from CEP engine: " + e.getMessage());
+            }
+        }
+
         ruleRepository.delete(existing);
     }
 
@@ -59,29 +94,78 @@ public class RuleServiceImpl implements RuleService {
             throw new IllegalArgumentException("Rule with name '" + updatedRule.getName() + "' already exists");
         }
 
+        // Validate the updated EPL query before making changes
+        try {
+            cepEngine.checkRule(updatedRule);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid EPL query: " + e.getMessage(), e);
+        }
+
+        // If the rule is active and deployed, undeploy it first
+        if (existing.getActive()) {
+            try {
+                cepEngine.undeployRule(existing.getName());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to undeploy existing rule: " + e.getMessage(), e);
+            }
+        }
+
         existing.setName(updatedRule.getName());
         existing.setEplQuery(updatedRule.getEplQuery());
         existing.setDescription(updatedRule.getDescription());
         existing.setActive(updatedRule.getActive());
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return ruleRepository.save(existing);
+        Rule saved = ruleRepository.save(existing);
+
+        // If the updated rule is active, deploy it
+        if (saved.getActive()) {
+            try {
+                cepEngine.deployRule(saved);
+                ruleRepository.save(saved);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to deploy updated rule: " + e.getMessage(), e);
+            }
+        }
+
+        return saved;
     }
 
     @Transactional
     public void activateRule(Long id) {
         Rule rule = getRuleById(id);
-        rule.setActive(true);
-        rule.setUpdatedAt(LocalDateTime.now());
-        ruleRepository.save(rule);
+
+        if (!rule.getActive()) {
+            rule.setActive(true);
+            rule.setUpdatedAt(LocalDateTime.now());
+            Rule saved = ruleRepository.save(rule);
+
+            // Deploy the rule to CEP engine
+            try {
+                cepEngine.deployRule(saved);
+                ruleRepository.save(saved);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to deploy rule to CEP engine: " + e.getMessage(), e);
+            }
+        }
     }
 
     @Transactional
     public void deactivateRule(Long id) {
         Rule rule = getRuleById(id);
-        rule.setActive(false);
-        rule.setUpdatedAt(LocalDateTime.now());
-        ruleRepository.save(rule);
+
+        if (rule.getActive()) {
+            // Undeploy from CEP engine first
+            try {
+                cepEngine.undeployRule(rule.getName());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to undeploy rule from CEP engine: " + e.getMessage(), e);
+            }
+
+            rule.setActive(false);
+            rule.setUpdatedAt(LocalDateTime.now());
+            ruleRepository.save(rule);
+        }
     }
 
     public List<Rule> getActiveRules() {

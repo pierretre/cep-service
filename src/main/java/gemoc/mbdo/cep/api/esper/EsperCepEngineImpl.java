@@ -61,7 +61,15 @@ public class EsperCepEngineImpl implements CepEngine {
 
     @Override
     public void checkRule(Rule rule) throws Exception {
-        // TODO
+        // Validate the EPL query by attempting to compile it
+        String epl = "@name('" + rule.getName() + "') " + rule.getEplQuery();
+        try {
+            compile(compiler, epl, configuration);
+            log.info("Rule validation successful: " + rule.getName());
+        } catch (EPCompileException e) {
+            log.error("Rule validation failed: " + rule.getName(), e);
+            throw new Exception("EPL compilation failed: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -69,6 +77,8 @@ public class EsperCepEngineImpl implements CepEngine {
      */
     @Override
     public void deployRule(Rule rule) throws Exception {
+        log.info("Deploying rule ! " + rule);
+
         if (deployedRules.containsKey(rule.getName())) {
             System.out.println("Rule '" + rule.getName() + "' already deployed, skipping");
             return;
@@ -98,6 +108,7 @@ public class EsperCepEngineImpl implements CepEngine {
     /**
      * Undeploy a rule
      */
+    @Override
     public void undeployRule(String ruleName) throws Exception {
         Rule deployed = deployedRules.get(ruleName);
         if (deployed == null) {

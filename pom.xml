@@ -22,17 +22,17 @@
         <dependency>
             <groupId>com.espertech</groupId>
             <artifactId>esper-common</artifactId>
-            <version>8.9.0</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.espertech</groupId>
             <artifactId>esper-compiler</artifactId>
-            <version>8.9.0</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.espertech</groupId>
             <artifactId>esper-runtime</artifactId>
-            <version>8.9.0</version>
+            <version>9.0.0</version>
         </dependency>
 
         <!-- Spring Boot -->
@@ -82,18 +82,18 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- H2 Database (for development/testing) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
             <scope>provided</scope>
-        </dependency>
-
-        <!-- Override ANTLR version to fix compatibility with Spring Data JPA 4.0.1 -->
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.2</version>
         </dependency>
     </dependencies>
 
