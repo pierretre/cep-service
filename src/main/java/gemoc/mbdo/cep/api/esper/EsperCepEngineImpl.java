@@ -9,27 +9,46 @@ import com.espertech.esper.compiler.client.EPCompilerProvider;
 import com.espertech.esper.runtime.client.*;
 import gemoc.mbdo.cep.interfaces.CepEngine;
 import gemoc.mbdo.cep.api.model.Rule;
+import gemoc.mbdo.cep.api.model.Incident;
+import gemoc.mbdo.cep.api.model.IncidentSeverity;
+import gemoc.mbdo.cep.api.repository.IncidentRepository;
+import gemoc.mbdo.cep.api.repository.RuleRepository;
 import gemoc.mbdo.cep.api.model.Event;
+import gemoc.mbdo.cep.api.dto.IncidentResponse;
+import gemoc.mbdo.cep.api.service.IncidentSseService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Esper CEP Engine implementation that manages rule deployment and event
  * processing
  */
 @Slf4j
+@Component
 public class EsperCepEngineImpl implements CepEngine {
 
     private final EPCompiler compiler;
     private final EPRuntime runtime;
     private final Configuration configuration;
     private final Map<String, Rule> deployedRules;
+    private final IncidentRepository incidentRepository;
+    private final RuleRepository ruleRepository;
+    private final IncidentSseService incidentSseService;
 
-    public EsperCepEngineImpl() {
+    @Autowired
+    public EsperCepEngineImpl(IncidentRepository incidentRepository, RuleRepository ruleRepository,
+            IncidentSseService incidentSseService) {
         System.out.println("\n=== Initializing Esper CEP Engine ===\n");
 
+        this.incidentRepository = incidentRepository;
+        this.ruleRepository = ruleRepository;
+        this.incidentSseService = incidentSseService;
         this.configuration = new Configuration();
         this.configuration.getCommon().addEventType(Event.class);
 
@@ -65,6 +84,9 @@ public class EsperCepEngineImpl implements CepEngine {
         statement.addListener((newEvents, oldEvents, stmt, rt) -> {
             for (com.espertech.esper.common.client.EventBean event : newEvents) {
                 System.out.println("[" + rule.getName() + "] MATCH: " + formatEvent(event));
+
+                // Create and save incident to database
+                createIncident(rule, event);
             }
         });
 
@@ -134,5 +156,42 @@ public class EsperCepEngineImpl implements CepEngine {
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    /**
+     * Create and save an incident when a rule is triggered
+     */
+    private void createIncident(Rule deployedRule, com.espertech.esper.common.client.EventBean eventBean) {
+        try {
+            // Fetch the Rule entity from database to ensure it's managed
+            Rule ruleEntity = ruleRepository.findByName(deployedRule.getName())
+                    .orElseThrow(() -> new RuntimeException("Rule not found: " + deployedRule.getName()));
+
+            // Create incident message with event details
+            String message = String.format("Rule '%s' triggered: %s",
+                    deployedRule.getName(),
+                    formatEvent(eventBean));
+
+            // Create new incident
+            Incident incident = new Incident();
+            incident.setMessage(message);
+            incident.setRule(ruleEntity);
+            incident.setSeverity(IncidentSeverity.Warning); // Default severity, can be customized
+            incident.setStartTime(LocalDateTime.now());
+            incident.setCreatedAt(LocalDateTime.now());
+
+            // Save to database
+            Incident savedIncident = incidentRepository.save(incident);
+
+            log.info("Incident created with ID: {} for rule: {}", savedIncident.getId(), deployedRule.getName());
+
+            // Broadcast incident via SSE
+            IncidentResponse incidentResponse = IncidentResponse.fromIncident(savedIncident);
+            incidentSseService.broadcastIncident(incidentResponse);
+            log.debug("Incident broadcasted to {} SSE clients", incidentSseService.getActiveConnectionCount());
+
+        } catch (Exception e) {
+            log.error("Failed to create incident for rule: {}", deployedRule.getName(), e);
+        }
     }
 }

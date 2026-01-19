@@ -10,7 +10,7 @@
             <div class="flex items-center">
               <div class="w-2 h-2 rounded-full mr-2" [class]="isConnected() ? 'bg-green-400' : 'bg-red-400'"></div>
               <span class="text-sm text-gray-600">
-                {{ isConnected() ? 'Polling Active' : 'Disconnected' }}
+                {{ isConnected() ? 'Live (SSE)' : 'Disconnected' }}
               </span>
             </div>
             <button (click)="refreshData()"

@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import '@greycat/web';
 import { Incident, IncidentSeverity } from './models';
 import { initFlowbite } from 'flowbite';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment';
+import { IncidentService } from './services/incident.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -18,9 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'Incident Dashboard';
   searchTerm = '';
   selectedSeverity = '';
-  private pollingInterval: any = null;
-  private greycat: any = null;
-  private isPolling = false;
+  private sseSubscription: Subscription | null = null;
   private lastUpdateTime = new Date();
 
   // Expose enums to template
@@ -62,7 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly incidentService: IncidentService) { }
 
   getSeverityClass(severity: IncidentSeverity): string {
     switch (severity) {
@@ -95,14 +93,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.selectedSeverity = '';
   }
 
-  // Connection status for polling
+  // Connection status for SSE
   isConnected(): boolean {
-    return this.greycat !== null && this.isPolling;
+    return this.incidentService.isConnected();
   }
 
   // Manual refresh method
   refreshData(): void {
-    this.fetchIncidentsData();
+    this.loadInitialIncidents();
   }
 
   // Get last update time
@@ -114,112 +112,58 @@ export class AppComponent implements OnInit, OnDestroy {
     // Initialize Flowbite
     initFlowbite();
 
-    try {
-      // Check if GreyCat is available
-      if (typeof gc !== 'undefined' && (gc as any).sdk) {
-        // Initialize GreyCat
-        this.greycat = await (gc as any).sdk.init({ timezone: 'Europe/Luxembourg' });
-        if ((gc as any).core && (gc as any).core.TimeZone) {
-          this.greycat.timezone = (gc as any).core.TimeZone['Europe/Luxembourg'];
-        }
+    // Load initial incidents
+    this.loadInitialIncidents();
 
-        console.log('GreyCat initialized successfully');
-
-        // Start polling for incidents data
-        this.startPolling();
-
-        // Initial data fetch
-        await this.fetchIncidentsData();
-      } else {
-        console.warn('GreyCat SDK not available');
-      }
-
-    } catch (error) {
-      console.error('Error initializing GreyCat:', error);
-    }
+    // Connect to SSE stream for real-time updates
+    this.connectToSseStream();
   }
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    // Disconnect from SSE stream
+    if (this.sseSubscription) {
+      this.sseSubscription.unsubscribe();
+    }
+    this.incidentService.disconnectFromIncidentStream();
   }
 
-  private startPolling(): void {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-    }
-
-    this.isPolling = true;
-    console.log('Starting polling every 200ms...');
-
-    this.pollingInterval = setInterval(() => {
-      this.fetchIncidentsData();
-    }, 200); // Poll every 200ms
-  }
-
-  private stopPolling(): void {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
-    this.isPolling = false;
-    console.log('Polling stopped');
-  }
-
-  private async fetchIncidentsDataFromGreycat(): Promise<void> {
-    if (!this.greycat) {
-      return;
-    }
-
-    try {
-      // Spawn the task to get incidents
-      const task = await this.greycat.spawn('web-api::incidents');
-      const result = await this.greycat.await(task);
-
-      // Update last update time
-      this.lastUpdateTime = new Date();
-
-      // Process the incidents data
-      this.processIncidentsData(result);
-
-    } catch (error) {
-      console.error('Error fetching incidents:', error);
-    }
-  }
-  private async fetchIncidentsData(): Promise<void> {
-    try {
-      console.log('Fetching incidents from REST API...', environment.apiUrl);
-      this.http.get<Incident[]>(`${environment.apiUrl}/incidents`).subscribe(result => {
-        // Update last update time
+  private loadInitialIncidents(): void {
+    this.incidentService.getAllIncidents().subscribe({
+      next: (incidents) => {
+        this.incidents = incidents;
         this.lastUpdateTime = new Date();
-
-        // Process the incidents data
-        this.processIncidentsData(result);
-      });
-    } catch (error) {
-      console.error('Error fetching incidents:', error);
-    }
+        console.log(`Loaded ${incidents.length} incidents`);
+      },
+      error: (error) => {
+        console.error('Error loading incidents:', error);
+      }
+    });
   }
-  private processIncidentsData(result: any): void {
-    if (!result) {
-      return;
-    }
 
-    // Minimal handling - assume result is already in correct Incident format
-    if (Array.isArray(result)) {
-      this.incidents = result.map(incident => ({
-        ...incident,
-        start_time: new Date(incident.start_time),
-        end_time: new Date(incident.end_time)
-      }));
-    } else if (result && typeof result === 'object') {
-      this.incidents = [{
-        ...result,
-        start_time: new Date(result.start_time),
-        end_time: new Date(result.end_time)
-      }];
-    }
+  private connectToSseStream(): void {
+    this.sseSubscription = this.incidentService.connectToIncidentStream().subscribe({
+      next: (incident) => {
+        console.log('New incident received via SSE:', incident);
 
-    console.log(`Updated incidents: ${this.incidents.length} items`);
+        // Check if incident already exists (by ID)
+        const existingIndex = this.incidents.findIndex(i => i.id === incident.id);
+
+        if (existingIndex >= 0) {
+          // Update existing incident
+          this.incidents[existingIndex] = incident;
+          console.log(`Updated incident ${incident.id}`);
+        } else {
+          // Add new incident
+          this.incidents.push(incident);
+          console.log(`Added new incident ${incident.id}`);
+        }
+
+        this.lastUpdateTime = new Date();
+      },
+      error: (error) => {
+        console.error('SSE stream error:', error);
+      }
+    });
   }
 }
 

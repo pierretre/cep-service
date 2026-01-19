@@ -2,6 +2,7 @@ package gemoc.mbdo.cep.api.controller;
 
 import gemoc.mbdo.cep.api.dto.IncidentResponse;
 import gemoc.mbdo.cep.api.model.Incident;
+import gemoc.mbdo.cep.api.service.IncidentSseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -11,8 +12,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import gemoc.mbdo.cep.interfaces.IncidentService;
 
@@ -21,12 +24,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/incidents")
-@CrossOrigin(origins = "*")
 @Tag(name = "Incidents", description = "APIs for retrieving rule violations/incidents")
 public class IncidentController {
 
     @Autowired
     private IncidentService incidentService;
+
+    @Autowired
+    private IncidentSseService incidentSseService;
 
     @GetMapping
     @Operation(summary = "Get all incidents", description = "Retrieve all incidents from the system")
@@ -55,5 +60,14 @@ public class IncidentController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "Stream incidents via SSE", description = "Subscribe to real-time incident updates using Server-Sent Events")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "SSE stream established")
+    })
+    public SseEmitter streamIncidents() {
+        return incidentSseService.registerClient();
     }
 }

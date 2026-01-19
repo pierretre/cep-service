@@ -43,6 +43,7 @@ public class IncidentResponse {
         response.setMessage(incident.getMessage());
         response.setRule(RuleResponse.fromRule(incident.getRule()));
         response.setSeverity(incident.getSeverity());
+        response.setStartTime(incident.getStartTime());
         response.setEndTime(incident.getEndTime());
         response.setCreatedAt(incident.getCreatedAt());
         response.setUpdatedAt(incident.getUpdatedAt());

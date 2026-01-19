@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
-    private String id;
-    private String type;
     private String source;
     private String key;
     private Object value;
@@ -23,8 +21,6 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event{id='" + id + "', type='" + type + "', source='" + source + "' key='" + key + "', value=" + value
-                + ", timestamp="
-                + timestamp + "}";
+        return "Event{source='" + source + "' key='" + key + "', value=" + value + ", timestamp=" + timestamp + "}";
     }
 }

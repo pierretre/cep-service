@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/rules")
-@CrossOrigin(origins = "*")
 @Tag(name = "Rule Management", description = "APIs for managing CEP rules")
 public class RuleController {
 
