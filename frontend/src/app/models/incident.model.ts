@@ -18,7 +18,7 @@ export function fromIncident(incident: any): Incident {
     rule: fromRule(incident.rule),
     severity: incident.severity,
     startTime: new Date(incident.startTime),
-    endTime: new Date(incident.endTime),
+    endTime: incident.endTime ? new Date(incident.endTime) : undefined,
     createdAt: new Date(incident.createdAt),
     updatedAt: new Date(incident.updatedAt),
   };

@@ -100,13 +100,19 @@
         <!-- Incidents List -->
         <div class="bg-white shadow rounded-lg">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-medium text-gray-900">
-              Incidents ({{ filteredIncidents.length }})
-            </h2>
+            <div class="flex justify-between items-center">
+              <h2 class="text-lg font-medium text-gray-900">
+                Incidents ({{ filteredIncidents.length }})
+              </h2>
+              <div class="text-sm text-gray-500">
+                Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize,
+                filteredIncidents.length) }} of {{ filteredIncidents.length }}
+              </div>
+            </div>
           </div>
 
           <div class="divide-y divide-gray-200">
-            @for (incident of filteredIncidents; track incident.rule) {
+            @for (incident of paginatedIncidents; track incident.id) {
             <div class="p-6 hover:bg-gray-50 transition-colors duration-150">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -182,6 +188,67 @@
             </div>
             }
           </div>
+
+          <!-- Pagination Controls -->
+          @if (filteredIncidents.length > 0) {
+          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <label for="pageSize" class="text-sm text-gray-700">Items per page:</label>
+                <select id="pageSize" [(ngModel)]="pageSize" (change)="currentPage = 1"
+                  class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option [value]="5">5</option>
+                  <option [value]="10">10</option>
+                  <option [value]="20">20</option>
+                  <option [value]="50">50</option>
+                </select>
+              </div>
+
+              <nav class="flex items-center space-x-2">
+                <!-- Previous Button -->
+                <button (click)="previousPage()" [disabled]="currentPage === 1"
+                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Previous
+                </button>
+
+                <!-- Page Numbers -->
+                <div class="flex space-x-1">
+                  @if (pageNumbers[0] > 1) {
+                  <button (click)="goToPage(1)"
+                    class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    1
+                  </button>
+                  @if (pageNumbers[0] > 2) {
+                  <span class="px-2 py-1 text-gray-500">...</span>
+                  }
+                  }
+
+                  @for (page of pageNumbers; track page) {
+                  <button (click)="goToPage(page)"
+                    [class]="page === currentPage ? 'px-3 py-1 border border-blue-500 rounded-md text-sm font-medium text-white bg-blue-600' : 'px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50'">
+                    {{ page }}
+                  </button>
+                  }
+
+                  @if (pageNumbers[pageNumbers.length - 1] < totalPages) { @if (pageNumbers[pageNumbers.length - 1] <
+                    totalPages - 1) { <span class="px-2 py-1 text-gray-500">...</span>
+                    }
+                    <button (click)="goToPage(totalPages)"
+                      class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                      {{ totalPages }}
+                    </button>
+                    }
+                </div>
+
+                <!-- Next Button -->
+                <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+                  class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next
+                </button>
+              </nav>
+            </div>
+          </div>
+          }
         </div>
       </div>
       <!-- End of Left Side: Chart, Filters, and Incidents List -->

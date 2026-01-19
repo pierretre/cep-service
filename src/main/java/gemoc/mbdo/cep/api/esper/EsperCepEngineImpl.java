@@ -112,13 +112,26 @@ public class EsperCepEngineImpl implements CepEngine {
     public void undeployRule(String ruleName) throws Exception {
         Rule deployed = deployedRules.get(ruleName);
         if (deployed == null) {
-            System.out.println("Rule '" + ruleName + "' not deployed");
+            log.warn("Rule '{}' not found in deployed rules map, skipping undeploy", ruleName);
             return;
         }
 
-        runtime.getDeploymentService().undeploy(deployed.getDeploymentId());
-        deployedRules.remove(ruleName);
-        System.out.println("✓ Undeployed rule: " + ruleName);
+        if (deployed.getDeploymentId() == null) {
+            log.warn("Rule '{}' has no deployment ID, removing from map", ruleName);
+            deployedRules.remove(ruleName);
+            return;
+        }
+
+        try {
+            runtime.getDeploymentService().undeploy(deployed.getDeploymentId());
+            deployedRules.remove(ruleName);
+            System.out.println("✓ Undeployed rule: " + ruleName);
+        } catch (Exception e) {
+            log.error("Failed to undeploy rule '{}' with deployment ID '{}'", ruleName, deployed.getDeploymentId(), e);
+            // Remove from map even if undeploy fails to prevent future errors
+            deployedRules.remove(ruleName);
+            throw e;
+        }
     }
 
     /**

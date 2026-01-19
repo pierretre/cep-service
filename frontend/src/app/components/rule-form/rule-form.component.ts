@@ -41,6 +41,10 @@ export class RuleFormComponent {
         this.submitMessage = null;
     }
 
+    dismissMessage(): void {
+        this.submitMessage = null;
+    }
+
     onSubmitRule(): void {
         if (!this.newRule.name || !this.newRule.eplQuery) {
             return;
@@ -59,22 +63,22 @@ export class RuleFormComponent {
                 console.log('Rule created successfully:', rule);
                 this.submitMessage = {
                     type: 'success',
-                    text: 'Rule created successfully!'
+                    text: `Rule "${rule.name}" created successfully!`
                 };
                 this.isSubmitting = false;
+                this.ruleCreated.emit();
 
-                // Reset form and close panel after 2 seconds
+                // Reset form after a short delay
                 setTimeout(() => {
                     this.resetForm();
-                    this.ruleCreated.emit();
-                    this.close.emit();
-                }, 2000);
+                }, 3000);
             },
             error: (error) => {
                 console.error('Error creating rule:', error);
+                const errorMessage = error.error?.message || error.error || error.message || 'Failed to create rule. Please check your EPL query and try again.';
                 this.submitMessage = {
                     type: 'error',
-                    text: error.error?.message || error.error || 'Failed to create rule. Please try again.'
+                    text: errorMessage
                 };
                 this.isSubmitting = false;
             }

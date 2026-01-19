@@ -25,11 +25,16 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Expose enums to template
   IncidentSeverity = IncidentSeverity;
+  Math = Math;
 
   incidents: Incident[] = [];
 
   // Rule form state
   showRulePanel = false;
+
+  // Pagination state
+  currentPage = 1;
+  pageSize = 10;
 
   get filteredIncidents(): Incident[] {
     let filtered = this.incidents;
@@ -65,6 +70,32 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  get paginatedIncidents(): Incident[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.filteredIncidents.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredIncidents.length / this.pageSize);
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
   constructor(private readonly incidentService: IncidentService) { }
 
   getSeverityClass(severity: IncidentSeverity): string {
@@ -96,6 +127,26 @@ export class AppComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedSeverity = '';
+    this.currentPage = 1; // Reset to first page when clearing filters
+  }
+
+  // Pagination methods
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
   }
 
   // Rule panel methods
