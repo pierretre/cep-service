@@ -19,8 +19,8 @@ public class Incident {
     @Column(nullable = false)
     private String message;
 
-    @ManyToOne
-    @JoinColumn(name = "rule_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rule_id", nullable = false, foreignKey = @ForeignKey(name = "fk_incidents_rule_id"))
     private Rule rule;
 
     @Column(nullable = false)
@@ -29,21 +29,21 @@ public class Incident {
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    private LocalDateTime endTime;
-
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column
     private LocalDateTime updatedAt;
 
-    public Incident() {}
+    public Incident() {
+    }
 
-    public Incident(String message, Rule rule, IncidentSeverity severity, LocalDateTime startTime, boolean ended) {
+    public Incident(String message, Rule rule, IncidentSeverity severity, LocalDateTime startTime) {
         this.message = message;
         this.rule = rule;
         this.severity = severity;
         this.startTime = startTime;
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

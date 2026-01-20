@@ -2,6 +2,7 @@ package gemoc.mbdo.cep.api.controller;
 
 import gemoc.mbdo.cep.api.dto.RuleRequest;
 import gemoc.mbdo.cep.api.dto.RuleResponse;
+import gemoc.mbdo.cep.api.dto.RuleUpdateResponse;
 import gemoc.mbdo.cep.api.service.RuleServiceImpl;
 import gemoc.mbdo.cep.api.model.Rule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,7 +105,7 @@ public class RuleController {
     @PutMapping("/{id}")
     @Operation(summary = "Update a rule", description = "Update an existing CEP rule")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Rule updated successfully", content = @Content(schema = @Schema(implementation = RuleResponse.class))),
+            @ApiResponse(responseCode = "200", description = "Rule updated successfully", content = @Content(schema = @Schema(implementation = RuleUpdateResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "404", description = "Rule not found")
     })
@@ -114,8 +115,24 @@ public class RuleController {
         try {
             Rule updatedRule = new Rule(request.getName(), request.getEplQuery(), request.getDescription());
             updatedRule.setActive(request.getActive());
-            Rule result = ruleService.updateRule(id, updatedRule);
-            return ResponseEntity.ok(RuleResponse.fromRule(result));
+            RuleServiceImpl.RuleUpdateResult result = ruleService.updateRule(id, updatedRule);
+
+            // Build notification message
+            String message;
+            if (result.isEplQueryChanged() && result.getDeletedIncidentsCount() > 0) {
+                message = String.format("Rule updated successfully. %d incident%s deleted due to EPL query change.",
+                        result.getDeletedIncidentsCount(),
+                        result.getDeletedIncidentsCount() == 1 ? " was" : "s were");
+            } else {
+                message = "Rule updated successfully.";
+            }
+
+            RuleUpdateResponse response = new RuleUpdateResponse(
+                    RuleResponse.fromRule(result.getRule()),
+                    message,
+                    result.isEplQueryChanged() ? result.getDeletedIncidentsCount() : 0L);
+
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

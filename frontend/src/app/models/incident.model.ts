@@ -6,9 +6,8 @@ export interface Incident {
   rule: Rule;
   severity: IncidentSeverity;
   startTime: Date;
-  endTime?: Date;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export function fromIncident(incident: any): Incident {
@@ -18,9 +17,8 @@ export function fromIncident(incident: any): Incident {
     rule: fromRule(incident.rule),
     severity: incident.severity,
     startTime: new Date(incident.startTime),
-    endTime: incident.endTime ? new Date(incident.endTime) : undefined,
     createdAt: new Date(incident.createdAt),
-    updatedAt: new Date(incident.updatedAt),
+    updatedAt: incident.updatedAt ? new Date(incident.updatedAt) : undefined,
   };
 }
 

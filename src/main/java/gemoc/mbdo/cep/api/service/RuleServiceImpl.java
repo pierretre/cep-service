@@ -1,5 +1,6 @@
 package gemoc.mbdo.cep.api.service;
 
+import gemoc.mbdo.cep.api.repository.IncidentRepository;
 import gemoc.mbdo.cep.api.repository.RuleRepository;
 import gemoc.mbdo.cep.interfaces.RuleService;
 import gemoc.mbdo.cep.interfaces.CepEngine;
@@ -16,6 +17,9 @@ public class RuleServiceImpl implements RuleService {
 
     @Autowired
     private RuleRepository ruleRepository;
+
+    @Autowired
+    private IncidentRepository incidentRepository;
 
     @Autowired
     private CepEngine cepEngine;
@@ -86,7 +90,7 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Transactional
-    public Rule updateRule(Long id, Rule updatedRule) {
+    public RuleUpdateResult updateRule(Long id, Rule updatedRule) {
         Rule existing = getRuleById(id);
 
         if (!existing.getName().equals(updatedRule.getName()) &&
@@ -99,6 +103,18 @@ public class RuleServiceImpl implements RuleService {
             cepEngine.checkRule(updatedRule);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid EPL query: " + e.getMessage(), e);
+        }
+
+        // Check if EPL query has changed
+        boolean eplQueryChanged = !existing.getEplQuery().equals(updatedRule.getEplQuery());
+        long deletedIncidentsCount = 0;
+
+        // If EPL query changed, delete all incidents related to this rule
+        if (eplQueryChanged) {
+            deletedIncidentsCount = incidentRepository.countByRule(existing);
+            if (deletedIncidentsCount > 0) {
+                incidentRepository.deleteByRule(existing);
+            }
         }
 
         // If the rule is active and deployed, undeploy it first
@@ -128,7 +144,32 @@ public class RuleServiceImpl implements RuleService {
             }
         }
 
-        return saved;
+        return new RuleUpdateResult(saved, eplQueryChanged, deletedIncidentsCount);
+    }
+
+    // Inner class to hold update result information
+    public static class RuleUpdateResult {
+        private final Rule rule;
+        private final boolean eplQueryChanged;
+        private final long deletedIncidentsCount;
+
+        public RuleUpdateResult(Rule rule, boolean eplQueryChanged, long deletedIncidentsCount) {
+            this.rule = rule;
+            this.eplQueryChanged = eplQueryChanged;
+            this.deletedIncidentsCount = deletedIncidentsCount;
+        }
+
+        public Rule getRule() {
+            return rule;
+        }
+
+        public boolean isEplQueryChanged() {
+            return eplQueryChanged;
+        }
+
+        public long getDeletedIncidentsCount() {
+            return deletedIncidentsCount;
+        }
     }
 
     @Transactional

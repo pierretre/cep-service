@@ -12,6 +12,12 @@ export interface CreateRuleRequest {
     active: boolean;
 }
 
+export interface RuleUpdateResponse {
+    rule: any;
+    message: string;
+    deletedIncidentsCount: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -38,10 +44,8 @@ export class RuleService {
         );
     }
 
-    updateRule(id: number, request: CreateRuleRequest): Observable<Rule> {
-        return this.http.put<any>(`${this.apiUrl}/${id}`, request).pipe(
-            map(fromRule)
-        );
+    updateRule(id: number, request: CreateRuleRequest): Observable<RuleUpdateResponse> {
+        return this.http.put<RuleUpdateResponse>(`${this.apiUrl}/${id}`, request);
     }
 
     deleteRule(id: number): Observable<string> {

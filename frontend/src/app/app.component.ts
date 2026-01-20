@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import '@greycat/web';
 import { Incident, IncidentSeverity } from './models';
+import { Rule } from './models/rule.model';
 import { initFlowbite } from 'flowbite';
 import { IncidentService } from './services/incident.service';
 import { Subscription } from 'rxjs';
@@ -20,6 +21,10 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'Incident Dashboard';
   searchTerm = '';
   selectedSeverity = '';
+  startDate = '';
+  startTime = '';
+  endDate = '';
+  endTime = '';
   private sseSubscription: Subscription | null = null;
   private lastUpdateTime = new Date();
 
@@ -31,10 +36,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
   // Rule form state
   showRulePanel = false;
+  editingRule: Rule | null = null;
 
   // Pagination state
   currentPage = 1;
   pageSize = 10;
+
+  // Expanded incidents state
+  expandedIncidentIds = new Set<number>();
 
   get filteredIncidents(): Incident[] {
     let filtered = this.incidents;
@@ -51,6 +60,45 @@ export class AppComponent implements OnInit, OnDestroy {
     // Filter by severity
     if (this.selectedSeverity) {
       filtered = filtered.filter(incident => incident.severity === this.selectedSeverity);
+    }
+
+    // Filter by start date/time range
+    if (this.startDate) {
+      const timeStr = this.startTime || '00:00:00';
+      const startDateTimeStr = `${this.startDate}T${timeStr}`;
+      const startDateTime = new Date(startDateTimeStr);
+      console.log('Start datetime string:', startDateTimeStr, 'Parsed:', startDateTime, 'Valid:', !isNaN(startDateTime.getTime()));
+
+      if (!isNaN(startDateTime.getTime())) {
+        const beforeFilter = filtered.length;
+        filtered = filtered.filter(incident => {
+          const incidentDate = incident.startTime instanceof Date ? incident.startTime : new Date(incident.startTime);
+          const result = incidentDate >= startDateTime;
+          if (!result) {
+            console.log('Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', startDateTime);
+          }
+          return result;
+        });
+      }
+    }
+
+    // Filter by end date/time range
+    if (this.endDate) {
+      const timeStr = this.endTime || '23:59:59';
+      const endDateTimeStr = `${this.endDate}T${timeStr}`;
+      const endDateTime = new Date(endDateTimeStr);
+
+      if (!isNaN(endDateTime.getTime())) {
+        const beforeFilter = filtered.length;
+        filtered = filtered.filter(incident => {
+          const incidentDate = incident.startTime instanceof Date ? incident.startTime : new Date(incident.startTime);
+          const result = incidentDate <= endDateTime;
+          if (!result) {
+            console.log('Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', endDateTime);
+          }
+          return result;
+        });
+      }
     }
 
     // Sort by severity priority (critical > warning > info) and then by start time
@@ -116,10 +164,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  getStatusBadgeClass(endTime?: Date): string {
-    return endTime ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  }
-
   getIncidentCountBySeverity(severity: IncidentSeverity): number {
     return this.incidents.filter(incident => incident.severity === severity).length;
   }
@@ -127,7 +171,17 @@ export class AppComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.searchTerm = '';
     this.selectedSeverity = '';
+    this.startDate = '';
+    this.startTime = '';
+    this.endDate = '';
+    this.endTime = '';
     this.currentPage = 1; // Reset to first page when clearing filters
+  }
+
+  onFilterChange(): void {
+    console.log('Filter changed - resetting to page 1');
+    // Reset to first page when filters change
+    this.currentPage = 1;
   }
 
   // Pagination methods
@@ -152,15 +206,39 @@ export class AppComponent implements OnInit, OnDestroy {
   // Rule panel methods
   toggleRulePanel(): void {
     this.showRulePanel = !this.showRulePanel;
+    if (!this.showRulePanel) {
+      this.editingRule = null;
+    }
   }
 
   onRulePanelClose(): void {
     this.showRulePanel = false;
+    this.editingRule = null;
   }
 
   onRuleCreated(): void {
     // Optionally refresh incidents or show a notification
     console.log('Rule created, you may want to refresh data');
+  }
+
+  onRuleUpdated(): void {
+    // Refresh incidents to show updated rule information
+    console.log('Rule updated, refreshing incidents');
+    this.loadInitialIncidents();
+  }
+
+  onRuleDeleted(): void {
+    // Refresh incidents after rule deletion
+    console.log('Rule deleted, refreshing incidents');
+    this.loadInitialIncidents();
+    this.showRulePanel = false;
+    this.editingRule = null;
+  }
+
+  // Open rule form for editing
+  openRuleForEdit(rule: Rule): void {
+    this.editingRule = rule;
+    this.showRulePanel = true;
   }
 
   // Connection status for SSE
@@ -176,6 +254,20 @@ export class AppComponent implements OnInit, OnDestroy {
   // Get last update time
   getLastUpdateTime(): Date {
     return this.lastUpdateTime;
+  }
+
+  // Toggle incident expansion
+  toggleIncidentExpansion(incidentId: number): void {
+    if (this.expandedIncidentIds.has(incidentId)) {
+      this.expandedIncidentIds.delete(incidentId);
+    } else {
+      this.expandedIncidentIds.add(incidentId);
+    }
+  }
+
+  // Check if incident is expanded
+  isIncidentExpanded(incidentId: number): boolean {
+    return this.expandedIncidentIds.has(incidentId);
   }
 
   async ngOnInit(): Promise<void> {

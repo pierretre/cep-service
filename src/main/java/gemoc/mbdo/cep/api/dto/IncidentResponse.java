@@ -28,9 +28,6 @@ public class IncidentResponse {
     @Schema(description = "Start time of the incident (time of the event that triggered the incident)", example = "2026-01-15T10:30:00")
     private LocalDateTime startTime;
 
-    @Schema(description = "End time of the incident (time of the event that cancels the incident)", example = "2026-01-15T10:30:00")
-    private LocalDateTime endTime;
-
     @Schema(description = "Timestamp when the incident was created", example = "2026-01-15T10:30:00")
     private LocalDateTime createdAt;
 
@@ -44,7 +41,6 @@ public class IncidentResponse {
         response.setRule(RuleResponse.fromRule(incident.getRule()));
         response.setSeverity(incident.getSeverity());
         response.setStartTime(incident.getStartTime());
-        response.setEndTime(incident.getEndTime());
         response.setCreatedAt(incident.getCreatedAt());
         response.setUpdatedAt(incident.getUpdatedAt());
         return response;
