@@ -1,0 +1,8 @@
+/* Custom styles for Flowbite components */
+.incident-card {
+    transition: all 0.2s ease;
+}
+
+.incident-card:hover {
+    transform: translateY(-1px);
+}

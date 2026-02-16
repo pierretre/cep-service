@@ -16,6 +16,7 @@ import gemoc.mbdo.cep.api.repository.RuleRepository;
 import gemoc.mbdo.cep.api.model.Event;
 import gemoc.mbdo.cep.api.dto.IncidentResponse;
 import gemoc.mbdo.cep.api.service.IncidentSseService;
+import gemoc.mbdo.cep.api.service.IncidentServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -40,15 +41,17 @@ public class EsperCepEngineImpl implements CepEngine {
     private final IncidentRepository incidentRepository;
     private final RuleRepository ruleRepository;
     private final IncidentSseService incidentSseService;
+    private final IncidentServiceImpl incidentService;
 
     @Autowired
     public EsperCepEngineImpl(IncidentRepository incidentRepository, RuleRepository ruleRepository,
-            IncidentSseService incidentSseService) {
+            IncidentSseService incidentSseService, IncidentServiceImpl incidentService) {
         System.out.println("\n=== Initializing Esper CEP Engine ===\n");
 
         this.incidentRepository = incidentRepository;
         this.ruleRepository = ruleRepository;
         this.incidentSseService = incidentSseService;
+        this.incidentService = incidentService;
         this.configuration = new Configuration();
         this.configuration.getCommon().addEventType(Event.class);
 
@@ -206,6 +209,9 @@ public class EsperCepEngineImpl implements CepEngine {
 
             // Save to database
             Incident savedIncident = incidentRepository.save(incident);
+
+            // Evict cache since new incident was created
+            incidentService.evictCache();
 
             log.info("Incident created with ID: {} for rule: {}", savedIncident.getId(), deployedRule.getName());
 

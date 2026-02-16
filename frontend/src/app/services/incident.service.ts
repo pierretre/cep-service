@@ -1,9 +1,28 @@
 import { Injectable, NgZone } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Incident, fromIncident } from '../models';
+
+export interface PaginatedResponse {
+    incidents: Incident[];
+    currentPage: number;
+    totalItems: number;
+    totalPages: number;
+    pageSize: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+}
+
+export interface PaginationParams {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDir?: 'asc' | 'desc';
+    startTime?: number;
+    endTime?: number;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -23,6 +42,45 @@ export class IncidentService {
     getAllIncidents(): Observable<Incident[]> {
         return this.http.get<any[]>(`${environment.apiUrl}/incidents`).pipe(
             map(incidents => incidents.map(fromIncident))
+        );
+    }
+
+    /**
+     * Get paginated incidents from the API
+     */
+    getIncidentsPaginated(params: PaginationParams = {}): Observable<PaginatedResponse> {
+        const {
+            page = 0,
+            size = 20,
+            sortBy = 'createdAt',
+            sortDir = 'desc',
+            startTime,
+            endTime
+        } = params;
+
+        let httpParams = new HttpParams()
+            .set('page', page.toString())
+            .set('size', size.toString())
+            .set('sortBy', sortBy)
+            .set('sortDir', sortDir);
+
+        if (startTime !== undefined) {
+            httpParams = httpParams.set('startTime', startTime.toString());
+        }
+        if (endTime !== undefined) {
+            httpParams = httpParams.set('endTime', endTime.toString());
+        }
+
+        return this.http.get<any>(`${environment.apiUrl}/incidents/paginated`, { params: httpParams }).pipe(
+            map(response => ({
+                incidents: response.incidents.map(fromIncident),
+                currentPage: response.currentPage,
+                totalItems: response.totalItems,
+                totalPages: response.totalPages,
+                pageSize: response.pageSize,
+                hasNext: response.hasNext,
+                hasPrevious: response.hasPrevious
+            }))
         );
     }
 
