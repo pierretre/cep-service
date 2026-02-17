@@ -4,6 +4,7 @@ import { ScatterComponent } from '../../components/scatter/scatter.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FilterSidebarComponent } from '../../components/filter-sidebar/filter-sidebar.component';
 import { FilterStore } from '../../stores/filter.store';
+import { IncidentStore } from '../../stores/incident.store';
 
 interface SelectedData {
     startTime: Date;
@@ -30,18 +31,57 @@ interface SelectedData {
 export class HomeComponent {
     selectedData = signal<SelectedData | null>(null);
 
-    constructor(protected filterStore: FilterStore) { }
-
-    refreshData(): void {
-        // Trigger data refresh in chart component
-    }
+    constructor(
+        protected filterStore: FilterStore,
+        private incidentStore: IncidentStore
+    ) { }
 
     exportData(): void {
-        // Export current view data
+        const visibleStart = this.getVisibleStartTime();
+        const visibleEnd = this.getVisibleEndTime();
+
+        const incidents = this.incidentStore.filteredIncidents()
+            .filter(incident => {
+                const time = incident.startTime.getTime();
+                return time >= visibleStart && time <= visibleEnd;
+            })
+            .map(incident => ({
+                ...incident,
+                startTime: incident.startTime.toISOString(),
+                createdAt: incident.createdAt.toISOString(),
+                updatedAt: incident.updatedAt ? incident.updatedAt.toISOString() : undefined
+            }));
+
+        const payload = {
+            exportedAt: new Date().toISOString(),
+            visibleRange: {
+                start: new Date(visibleStart).toISOString(),
+                end: new Date(visibleEnd).toISOString()
+            },
+            total: incidents.length,
+            incidents
+        };
+
+        const json = JSON.stringify(payload, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `incidents-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
     }
 
-    openSettings(): void {
-        // Open settings dialog
+    private getVisibleStartTime(): number {
+        const visibleStart = this.incidentStore.visibleStartTime();
+        const start = this.incidentStore.startTime();
+        return isFinite(visibleStart) && visibleStart > 0 ? visibleStart : start;
+    }
+
+    private getVisibleEndTime(): number {
+        const visibleEnd = this.incidentStore.visibleEndTime();
+        const end = this.incidentStore.endTime();
+        return isFinite(visibleEnd) && visibleEnd > 0 ? visibleEnd : end;
     }
 
     onScatterSelection(event: any): void {

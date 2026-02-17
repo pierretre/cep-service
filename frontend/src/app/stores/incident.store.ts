@@ -22,6 +22,10 @@ export class IncidentStore {
     endTime = signal<number>(Date.now());
     resolution = signal<string>('1m'); // 1m, 5m, 15m, 1h, 6h, 1d
 
+    // Visible range (driven by scatter zoom)
+    visibleStartTime = signal<number>(0);
+    visibleEndTime = signal<number>(0);
+
     private lastStreamKey: string | null = null;
 
     // Severity filters
@@ -189,6 +193,26 @@ export class IncidentStore {
             this.lastStreamKey = key;
             this.incidentService.connectToIncidentsStream(start, end);
         });
+
+        effect(() => {
+            const start = this.startTime();
+            const end = this.endTime();
+
+            if (!isFinite(start) || !isFinite(end)) {
+                return;
+            }
+
+            const currentVisibleStart = this.visibleStartTime();
+            const currentVisibleEnd = this.visibleEndTime();
+
+            if (!currentVisibleStart || currentVisibleStart < start || currentVisibleStart > end) {
+                this.visibleStartTime.set(start);
+            }
+
+            if (!currentVisibleEnd || currentVisibleEnd > end || currentVisibleEnd < start) {
+                this.visibleEndTime.set(end);
+            }
+        });
     }
 
     /**
@@ -220,6 +244,16 @@ export class IncidentStore {
     setTimeRange(startTime: number, endTime: number): void {
         this.startTime.set(startTime);
         this.endTime.set(endTime);
+        this.visibleStartTime.set(startTime);
+        this.visibleEndTime.set(endTime);
+    }
+
+    /**
+     * Update visible time range (driven by scatter zoom)
+     */
+    setVisibleRange(startTime: number, endTime: number): void {
+        this.visibleStartTime.set(startTime);
+        this.visibleEndTime.set(endTime);
     }
 
     /**

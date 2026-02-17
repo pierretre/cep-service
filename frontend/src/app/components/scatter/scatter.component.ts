@@ -27,7 +27,6 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     chartInstance!: ECharts;
     chartOption!: EChartsOption;
-    aggregatedData: any = {};
 
     private destroy$ = new Subject<void>();
 
@@ -41,14 +40,6 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             console.log('[Component] Incidents updated - total count:', incidents.length);
             this.updateChartData();
         });
-
-        // React to aggregated incidents data changes
-        effect(() => {
-            this.aggregatedData = this.incidentStore.timeSeriesData();
-            console.log('[Component] Time-series data updated - critical:', this.aggregatedData.critical.length, 'warning:', this.aggregatedData.warning.length, 'info:', this.aggregatedData.info.length);
-            console.log('[Component] Aggregated incidents updated - total count:', this.aggregatedData.critical.length + this.aggregatedData.warning.length + this.aggregatedData.info.length);
-            this.updateChartData();
-        });
     }
 
     ngOnInit(): void {
@@ -59,6 +50,24 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
         // Initialize the chart instance here
         this.chartInstance = echarts.init(this.chartContainer.nativeElement);
         this.updateChartData();
+        this.updateVisibleRangeFromChart();
+        // Click handling
+        this.chartInstance.on('click', (params: any) => {
+            if (!params || !params.data) return;
+
+            const incidents = params.data.incidents;
+            if (!incidents || !incidents.length) return;
+
+            // For simplicity, just log them
+            console.log('Clicked incidents in this bucket:', incidents);
+
+            // Or trigger your detail display logic
+            // e.g., this.openIncidentDetails(incidents);
+        });
+
+        this.chartInstance.on('datazoom', () => {
+            this.updateVisibleRangeFromChart();
+        });
     }
 
     ngOnDestroy(): void {
@@ -69,20 +78,35 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private updateChartData(): void {
-        console.log('[Component] Updating chart data with aggregated data:', this.aggregatedData);
+    private updateChartData(visibleRange?: [number, number]): void {
         if (!this.chartInstance) return;
 
-        this.aggregatedData = {
+        const incidents = this.incidentStore.incidents();
+        if (!incidents?.length) {
+            this.chartInstance.setOption({ series: [] }, true);
+            return;
+        }
+
+        // Filter by visible range if provided
+        const visibleIncidents = visibleRange
+            ? incidents.filter(i => {
+                const ts = i.startTime.getTime();
+                return ts >= visibleRange[0] && ts <= visibleRange[1];
+            })
+            : incidents;
+
+        // Map each incident to a point
+        const seriesData: Record<'critical' | 'warning' | 'info', any[]> = {
             critical: [],
             warning: [],
             info: []
         };
 
-        this.incidentStore.incidents().forEach(incident => {
-            this.aggregatedData[incident.severity.toLowerCase()].push({
-                value: [incident.startTime.getTime(), 1],
-                severity: incident.severity.toLowerCase()
+        visibleIncidents.forEach(i => {
+            const key = i.severity.toLowerCase() as 'critical' | 'warning' | 'info';
+            seriesData[key].push({
+                value: [i.startTime.getTime(), 1], // y=1 for scatter
+                incident: i // attach full incident for tooltip/click
             });
         });
 
@@ -113,7 +137,6 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             yAxis: {
                 type: 'value',
-                name: 'Incident Count',
                 scale: true,
                 minInterval: 1
             },
@@ -139,26 +162,48 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
                     name: 'Critical',
                     type: 'line',
                     stack: 'total',
-                    data: this.aggregatedData.critical,
+                    data: seriesData.critical,
                     itemStyle: { color: '#ef4444' }
                 },
                 {
                     name: 'Warning',
                     type: 'line',
                     stack: 'total',
-                    data: this.aggregatedData.warning,
+                    data: seriesData.warning,
                     itemStyle: { color: '#f97316' }
                 },
                 {
                     name: 'Info',
                     type: 'line',
                     stack: 'total',
-                    data: this.aggregatedData.info,
+                    data: seriesData.info,
                     itemStyle: { color: '#eab308' }
                 }
             ]
         };
 
         this.chartInstance.setOption(this.chartOption);
+        this.updateVisibleRangeFromChart();
+    }
+
+    private updateVisibleRangeFromChart(): void {
+        if (!this.chartInstance) return;
+
+        const option = this.chartInstance.getOption() as any;
+        const dataZoom = option?.dataZoom?.[0];
+        const startPercent = typeof dataZoom?.start === 'number' ? dataZoom.start : 0;
+        const endPercent = typeof dataZoom?.end === 'number' ? dataZoom.end : 100;
+
+        const min = this.incidentStore.startTime();
+        const max = this.incidentStore.endTime();
+
+        if (!isFinite(min) || !isFinite(max) || min >= max) {
+            return;
+        }
+
+        const visibleStart = min + ((max - min) * startPercent) / 100;
+        const visibleEnd = min + ((max - min) * endPercent) / 100;
+
+        this.incidentStore.setVisibleRange(visibleStart, visibleEnd);
     }
 }
