@@ -102,7 +102,7 @@ export class IncidentService {
         }
 
         const url = `${environment.apiUrl}/incidents/stream`;
-        console.log('Connecting to SSE endpoint:', url);
+        console.log('[Service] Connecting to SSE endpoint:', url);
 
         this.eventSource = new EventSource(url);
 
@@ -113,18 +113,18 @@ export class IncidentService {
                     const incident = fromIncident(data);
                     this.incidentSubject.next(incident);
                 } catch (error) {
-                    console.error('Error parsing incident data:', error);
+                    console.error('[Service] Error parsing incident data:', error);
                 }
             });
         });
 
         this.eventSource.addEventListener('connected', (event: MessageEvent) => {
-            console.log('SSE connected:', event.data);
+            console.log('[Service] SSE connected:', event.data);
         });
 
         this.eventSource.onerror = (error) => {
-            console.error('SSE connection error:', error);
-            console.log('EventSource readyState:', this.eventSource?.readyState);
+            console.error('[Service] SSE connection error:', error);
+            console.log('[Service] EventSource readyState:', this.eventSource?.readyState);
 
             // Close the connection
             if (this.eventSource) {
@@ -134,13 +134,13 @@ export class IncidentService {
 
             // Attempt to reconnect after 5 seconds
             setTimeout(() => {
-                console.log('Attempting to reconnect to SSE...');
+                console.log('[Service] Attempting to reconnect to SSE...');
                 this.connectToIncidentStream();
             }, 5000);
         };
 
         this.eventSource.onopen = () => {
-            console.log('SSE connection established, readyState:', this.eventSource?.readyState);
+            console.log('[Service] SSE connection established, readyState:', this.eventSource?.readyState);
         };
 
         return this.incidentSubject.asObservable();
@@ -153,7 +153,7 @@ export class IncidentService {
         if (this.eventSource) {
             this.eventSource.close();
             this.eventSource = null;
-            console.log('SSE connection closed');
+            console.log('[Service] SSE connection closed');
         }
     }
 

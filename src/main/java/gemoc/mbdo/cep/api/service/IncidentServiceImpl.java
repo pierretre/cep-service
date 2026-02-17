@@ -70,4 +70,10 @@ public class IncidentServiceImpl implements IncidentService {
         LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime), ZoneId.systemDefault());
         return incidentRepository.findByStartTimeBetween(start, end, pageable);
     }
+
+    @Override
+    public List<Incident> getIncidentsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        log.debug("Fetching incidents between {} and {} from database", startTime, endTime);
+        return incidentRepository.findByStartTimeBetweenWithRule(startTime, endTime);
+    }
 }

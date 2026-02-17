@@ -212,7 +212,7 @@ public class TimeSeriesController {
                 try {
                         // Get time-series data with filters
                         TimeSeriesResponse response = timeSeriesService.getTimeSeriesData(
-                                        start, end, resolution, status, dataSource, severities);
+                                        start, end, resolution, severities);
 
                         System.out.println("SUCCESS: Returning " + response.getPoints().size() + " data points");
                         System.out.println("===========================");

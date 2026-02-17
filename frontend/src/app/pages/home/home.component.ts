@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AdaptiveScatterComponent } from '../../components/adaptive-timeseries-chart/adaptive-scatter.component';
+import { ScatterComponent } from '../../components/scatter/scatter.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FilterSidebarComponent } from '../../components/filter-sidebar/filter-sidebar.component';
 import { FilterStore } from '../../stores/filter.store';
@@ -23,7 +23,7 @@ interface SelectedData {
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, AdaptiveScatterComponent, NavbarComponent, FilterSidebarComponent],
+    imports: [CommonModule, ScatterComponent, NavbarComponent, FilterSidebarComponent],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })

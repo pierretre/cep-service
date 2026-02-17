@@ -97,7 +97,7 @@ export class RuleFormComponent implements OnChanges {
                     const rule = response.rule;
                     const message = response.message || `Rule "${rule.name}" updated successfully!`;
 
-                    console.log('Rule updated successfully:', rule);
+                    console.log('[Component] Rule updated successfully:', rule);
                     this.submitMessage = {
                         type: 'success',
                         text: message
@@ -110,7 +110,7 @@ export class RuleFormComponent implements OnChanges {
                     }, 3000);
                 },
                 error: (error: any) => {
-                    console.error('Error updating rule:', error);
+                    console.error('[Component] Error updating rule:', error);
                     const errorMessage = error.error?.message || error.error || error.message || 'Failed to update rule. Please check your EPL query and try again.';
                     this.submitMessage = {
                         type: 'error',
@@ -123,7 +123,7 @@ export class RuleFormComponent implements OnChanges {
             // Create new rule
             this.ruleService.createRule(ruleData).subscribe({
                 next: (rule: any) => {
-                    console.log('Rule created successfully:', rule);
+                    console.log('[Component] Rule created successfully:', rule);
                     this.submitMessage = {
                         type: 'success',
                         text: `Rule "${rule.name}" created successfully!`
@@ -136,7 +136,7 @@ export class RuleFormComponent implements OnChanges {
                     }, 3000);
                 },
                 error: (error: any) => {
-                    console.error('Error creating rule:', error);
+                    console.error('[Component] Error creating rule:', error);
                     const errorMessage = error.error?.message || error.error || error.message || 'Failed to create rule. Please check your EPL query and try again.';
                     this.submitMessage = {
                         type: 'error',
@@ -158,7 +158,7 @@ export class RuleFormComponent implements OnChanges {
 
         this.ruleService.deleteRule(this.editRule!.id).subscribe({
             next: () => {
-                console.log('Rule deleted successfully');
+                console.log('[Component] Rule deleted successfully');
                 this.submitMessage = {
                     type: 'success',
                     text: `Rule "${this.editRule!.name}" and associated incidents deleted successfully!`
@@ -172,7 +172,7 @@ export class RuleFormComponent implements OnChanges {
                 }, 2000);
             },
             error: (error: any) => {
-                console.error('Error deleting rule:', error);
+                console.error('[Component] Error deleting rule:', error);
                 const errorMessage = error.error?.message || error.error || error.message || 'Failed to delete rule.';
                 this.submitMessage = {
                     type: 'error',
@@ -195,7 +195,7 @@ export class RuleFormComponent implements OnChanges {
         operation.subscribe({
             next: () => {
                 const newStatus = !this.editRule!.active;
-                console.log(`Rule ${newStatus ? 'activated' : 'deactivated'} successfully`);
+                console.log(`[Component] Rule ${newStatus ? 'activated' : 'deactivated'} successfully`);
                 this.submitMessage = {
                     type: 'success',
                     text: `Rule "${this.editRule!.name}" ${newStatus ? 'activated' : 'deactivated'} successfully!`
@@ -212,7 +212,7 @@ export class RuleFormComponent implements OnChanges {
                 }, 3000);
             },
             error: (error: any) => {
-                console.error('Error toggling rule status:', error);
+                console.error('[Component] Error toggling rule status:', error);
                 const errorMessage = error.error?.message || error.error || error.message || 'Failed to toggle rule status.';
                 this.submitMessage = {
                     type: 'error',

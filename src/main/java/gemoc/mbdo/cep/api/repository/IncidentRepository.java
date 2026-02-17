@@ -25,4 +25,8 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
             @Param("endTime") LocalDateTime endTime,
             Pageable pageable);
 
+    @Query("SELECT i FROM Incident i JOIN FETCH i.rule WHERE i.startTime >= :startTime AND i.startTime <= :endTime")
+    java.util.List<Incident> findByStartTimeBetweenWithRule(@Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
+
 }

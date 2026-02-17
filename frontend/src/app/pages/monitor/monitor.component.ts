@@ -67,7 +67,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
             const timeStr = this.startTime || '00:00:00';
             const startDateTimeStr = `${this.startDate}T${timeStr}`;
             const startDateTime = new Date(startDateTimeStr);
-            console.log('Start datetime string:', startDateTimeStr, 'Parsed:', startDateTime, 'Valid:', !isNaN(startDateTime.getTime()));
+            console.log('[Component] Start datetime string:', startDateTimeStr, 'Parsed:', startDateTime, 'Valid:', !isNaN(startDateTime.getTime()));
 
             if (!isNaN(startDateTime.getTime())) {
                 const beforeFilter = filtered.length;
@@ -75,7 +75,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
                     const incidentDate = incident.startTime instanceof Date ? incident.startTime : new Date(incident.startTime);
                     const result = incidentDate >= startDateTime;
                     if (!result) {
-                        console.log('Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', startDateTime);
+                        console.log('[Component] Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', startDateTime);
                     }
                     return result;
                 });
@@ -94,7 +94,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
                     const incidentDate = incident.startTime instanceof Date ? incident.startTime : new Date(incident.startTime);
                     const result = incidentDate <= endDateTime;
                     if (!result) {
-                        console.log('Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', endDateTime);
+                        console.log('[Component] Filtered out incident:', incident.id, 'Date:', incidentDate, 'vs Filter:', endDateTime);
                     }
                     return result;
                 });
@@ -179,7 +179,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     }
 
     onFilterChange(): void {
-        console.log('Filter changed - resetting to page 1');
+        console.log('[Component] Filter changed - resetting to page 1');
         // Reset to first page when filters change
         this.currentPage = 1;
     }
@@ -218,18 +218,18 @@ export class MonitorComponent implements OnInit, OnDestroy {
 
     onRuleCreated(): void {
         // Optionally refresh incidents or show a notification
-        console.log('Rule created, you may want to refresh data');
+        console.log('[Component] Rule created, you may want to refresh data');
     }
 
     onRuleUpdated(): void {
         // Refresh incidents to show updated rule information
-        console.log('Rule updated, refreshing incidents');
+        console.log('[Component] Rule updated, refreshing incidents');
         this.loadInitialIncidents();
     }
 
     onRuleDeleted(): void {
         // Refresh incidents after rule deletion
-        console.log('Rule deleted, refreshing incidents');
+        console.log('[Component] Rule deleted, refreshing incidents');
         this.loadInitialIncidents();
         this.showRulePanel = false;
         this.editingRule = null;
@@ -294,10 +294,10 @@ export class MonitorComponent implements OnInit, OnDestroy {
             next: (incidents) => {
                 this.incidents = incidents;
                 this.lastUpdateTime = new Date();
-                console.log(`Loaded ${incidents.length} incidents`);
+                console.log(`[Component] Loaded ${incidents.length} incidents`);
             },
             error: (error) => {
-                console.error('Error loading incidents:', error);
+                console.error('[Component] Error loading incidents:', error);
             }
         });
     }
@@ -305,7 +305,7 @@ export class MonitorComponent implements OnInit, OnDestroy {
     private connectToSseStream(): void {
         this.sseSubscription = this.incidentService.connectToIncidentStream().subscribe({
             next: (incident) => {
-                console.log('New incident received via SSE:', incident);
+                console.log('[Component] New incident received via SSE:', incident);
 
                 // Check if incident already exists (by ID)
                 const existingIndex = this.incidents.findIndex(i => i.id === incident.id);
@@ -313,17 +313,17 @@ export class MonitorComponent implements OnInit, OnDestroy {
                 if (existingIndex >= 0) {
                     // Update existing incident
                     this.incidents[existingIndex] = incident;
-                    console.log(`Updated incident ${incident.id}`);
+                    console.log(`[Component] Updated incident ${incident.id}`);
                 } else {
                     // Add new incident
                     this.incidents.push(incident);
-                    console.log(`Added new incident ${incident.id}`);
+                    console.log(`[Component] Added new incident ${incident.id}`);
                 }
 
                 this.lastUpdateTime = new Date();
             },
             error: (error) => {
-                console.error('SSE stream error:', error);
+                console.error('[Component] SSE stream error:', error);
             }
         });
     }

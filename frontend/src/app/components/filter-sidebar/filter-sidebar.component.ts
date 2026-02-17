@@ -2,7 +2,7 @@ import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterHistoryControlsComponent } from '../filter-history-controls/filter-history-controls.component';
-import { FilterHistoryStore, FilterConfig } from '../../stores/filter-history.service';
+import { FilterHistoryStore, FilterConfig } from '../../stores/filter-history.store';
 import { FilterStore } from '../../stores/filter.store';
 
 @Component({

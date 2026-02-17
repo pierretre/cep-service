@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { FilterConfig } from './filter-history.service';
+import { FilterConfig } from './filter-history.store';
 
 /**
  * Centralized filter store using signals for reactive state management

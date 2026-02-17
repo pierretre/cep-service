@@ -1,6 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FilterHistoryStore } from '../../stores/filter-history.service';
+import { FilterHistoryStore } from '../../stores/filter-history.store';
 
 @Component({
     selector: 'app-filter-history-controls',
