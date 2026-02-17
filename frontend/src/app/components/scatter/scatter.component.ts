@@ -33,6 +33,7 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
     selectedIncident: Incident | null = null;
 
     private destroy$ = new Subject<void>();
+    private currentZoom: { start: number; end: number } = { start: 0, end: 100 };
 
     // Inject stores
     private incidentStore = inject(IncidentStore);
@@ -61,6 +62,18 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
 
             this.selectedIncident = incident;
             console.log('Selected incident:', incident);
+        });
+
+        // Track zoom changes
+        this.chartInstance.on('dataZoom', (params: any) => {
+            const option = this.chartInstance.getOption() as any;
+            if (option.dataZoom && option.dataZoom.length > 0) {
+                this.currentZoom = {
+                    start: option.dataZoom[0].start,
+                    end: option.dataZoom[0].end
+                };
+                console.log('Zoom changed:', this.currentZoom);
+            }
         });
     }
 
@@ -138,15 +151,15 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
                 {
                     type: 'inside',
                     xAxisIndex: 0,
-                    start: 0,
-                    end: 100,
+                    start: this.currentZoom.start,
+                    end: this.currentZoom.end,
                     zoomLock: false
                 },
                 {
                     type: 'slider',
                     xAxisIndex: 0,
-                    start: 0,
-                    end: 100,
+                    start: this.currentZoom.start,
+                    end: this.currentZoom.end,
                     height: 30,
                     bottom: 10
                 }
@@ -154,21 +167,21 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
             series: [
                 {
                     name: 'Critical',
-                    type: 'line',
+                    type: 'scatter',
                     stack: 'total',
                     data: seriesData.critical,
                     itemStyle: { color: '#ef4444' }
                 },
                 {
                     name: 'Warning',
-                    type: 'line',
+                    type: 'scatter',
                     stack: 'total',
                     data: seriesData.warning,
                     itemStyle: { color: '#f97316' }
                 },
                 {
                     name: 'Info',
-                    type: 'line',
+                    type: 'scatter',
                     stack: 'total',
                     data: seriesData.info,
                     itemStyle: { color: '#eab308' }
