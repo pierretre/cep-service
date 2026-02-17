@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { FilterConfig } from './filter-history.store';
+import { FilterConfig } from '../models/filter-config.model';
 
 /**
  * Centralized filter store using signals for reactive state management
@@ -39,52 +39,8 @@ export class FilterStore {
      * Update entire filter state
      */
     updateFilters(filters: Partial<FilterConfig>): void {
+        console.log('[Store] Updating filters with:', filters);
         this.filterState.update(current => ({ ...current, ...filters }));
-    }
-
-    /**
-     * Update date range from zoom event
-     */
-    updateDateRangeFromZoom(start: number, end: number): void {
-        const startDate = new Date(start).toISOString().split('T')[0];
-        const endDate = new Date(end).toISOString().split('T')[0];
-
-        this.filterState.update(current => ({
-            ...current,
-            startDate,
-            endDate
-        }));
-    }
-
-    /**
-     * Update severity levels
-     */
-    updateSeverityLevels(severityLevels: Partial<FilterConfig['severityLevels']>): void {
-        this.filterState.update(current => ({
-            ...current,
-            severityLevels: { ...current.severityLevels, ...severityLevels }
-        }));
-    }
-
-    /**
-     * Update status filter
-     */
-    updateStatus(status: string): void {
-        this.filterState.update(current => ({ ...current, status }));
-    }
-
-    /**
-     * Update data source filter
-     */
-    updateDataSource(dataSource: string): void {
-        this.filterState.update(current => ({ ...current, dataSource }));
-    }
-
-    /**
-     * Update aggregation period
-     */
-    updateAggregation(aggregation: string): void {
-        this.filterState.update(current => ({ ...current, aggregation }));
     }
 
     /**

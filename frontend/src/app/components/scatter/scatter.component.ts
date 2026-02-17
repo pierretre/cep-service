@@ -1,3 +1,4 @@
+import * as echarts from 'echarts';
 import {
     Component,
     OnInit,
@@ -8,12 +9,10 @@ import {
     effect,
     inject
 } from '@angular/core';
-import * as echarts from 'echarts';
 import { EChartsOption, ECharts } from 'echarts';
 import { Subject } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { IncidentStore } from '../../stores/incident.store';
-import { Incident, IncidentSeverity } from '../../models';
 
 @Component({
     selector: 'app-scatter',
@@ -28,6 +27,7 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     chartInstance!: ECharts;
     chartOption!: EChartsOption;
+    aggregatedData: any = {};
 
     private destroy$ = new Subject<void>();
 
@@ -39,48 +39,52 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
         effect(() => {
             const incidents = this.incidentStore.incidents();
             console.log('[Component] Incidents updated - total count:', incidents.length);
+            this.updateChartData();
+        });
 
-            this.updateChartData(incidents);
+        // React to aggregated incidents data changes
+        effect(() => {
+            this.aggregatedData = this.incidentStore.timeSeriesData();
+            console.log('[Component] Time-series data updated - critical:', this.aggregatedData.critical.length, 'warning:', this.aggregatedData.warning.length, 'info:', this.aggregatedData.info.length);
+            console.log('[Component] Aggregated incidents updated - total count:', this.aggregatedData.critical.length + this.aggregatedData.warning.length + this.aggregatedData.info.length);
+            this.updateChartData();
         });
     }
 
     ngOnInit(): void {
-        this.initChartOption();
     }
 
     ngAfterViewInit(): void {
-        this.initChart();
-        this.incidentStore.setPageReady(true);
+        console.log('[Component] Ready');
+        // Initialize the chart instance here
+        this.chartInstance = echarts.init(this.chartContainer.nativeElement);
+        this.updateChartData();
     }
 
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
-        this.incidentStore.setPageReady(false);
         if (this.chartInstance) {
             this.chartInstance.dispose();
         }
     }
 
-    private initChart(): void {
-        if (this.chartContainer) {
-            this.chartInstance = echarts.init(this.chartContainer.nativeElement);
-            this.chartInstance.setOption(this.chartOption);
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                this.chartInstance?.resize();
-            });
-        }
-    }
-
-    private initChartOption(): void {
-        this.updateChartData([]);
-    }
-
-    private updateChartData(data: Array<Incident>): void {
-        console.log('[Component] Updating chart data with', data.length, 'incidents');
+    private updateChartData(): void {
+        console.log('[Component] Updating chart data with aggregated data:', this.aggregatedData);
         if (!this.chartInstance) return;
+
+        this.aggregatedData = {
+            critical: [],
+            warning: [],
+            info: []
+        };
+
+        this.incidentStore.incidents().forEach(incident => {
+            this.aggregatedData[incident.severity.toLowerCase()].push({
+                value: [incident.startTime.getTime(), 1],
+                severity: incident.severity.toLowerCase()
+            });
+        });
 
         this.chartOption = {
             animation: false,
@@ -112,8 +116,8 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             xAxis: {
                 type: 'time',
                 name: 'Time',
-                nameLocation: 'middle',
-                nameGap: 30
+                min: this.incidentStore.startTime(),
+                max: this.incidentStore.endTime()
             },
             yAxis: {
                 type: 'value',
@@ -140,49 +144,34 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             series: [
                 {
                     name: 'Critical',
-                    type: 'bar',
+                    type: 'line',
                     stack: 'total',
-                    data: hourlyData.critical,
+                    data: this.aggregatedData.critical,
                     itemStyle: {
                         color: '#ef4444' // red
                     }
                 },
                 {
                     name: 'Warning',
-                    type: 'bar',
+                    type: 'line',
                     stack: 'total',
-                    data: hourlyData.warning,
+                    data: this.aggregatedData.warning,
                     itemStyle: {
                         color: '#f97316' // orange
                     }
                 },
                 {
                     name: 'Info',
-                    type: 'bar',
+                    type: 'line',
                     stack: 'total',
-                    data: hourlyData.info,
+                    data: this.aggregatedData.info,
                     itemStyle: {
                         color: '#eab308' // yellow
                     }
                 }
             ]
         };
-    }
 
-    private groupData(incidents: Incident[]): {
-        hours: string[];
-        critical: number[];
-        warning: number[];
-        info: number[];
-    } {
-        const now = new Date();
-        const critical: number[] = [];
-        const warning: number[] = [];
-        const info: number[] = [];
-        const zoomLevel = '1m'; // This should ideally come from the store or component state
-
-        // TODO
-
-        return { hours: [], critical, warning, info };
+        this.chartInstance.setOption(this.chartOption);
     }
 }

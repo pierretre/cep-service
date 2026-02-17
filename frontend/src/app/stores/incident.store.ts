@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { Incident } from '../models';
+import { Incident, IncidentSeverity } from '../models';
 import { FilterStore } from './filter.store';
 import { IncidentTimeSeriesService } from '../services/incident-timeseries.service';
 
@@ -22,8 +22,6 @@ export class IncidentStore {
     endTime = signal<number>(Date.now());
     resolution = signal<string>('1m'); // 1m, 5m, 15m, 1h, 6h, 1d
 
-    // Page readiness gate
-    private pageReady = signal<boolean>(false);
     private lastStreamKey: string | null = null;
 
     // Severity filters
@@ -68,41 +66,115 @@ export class IncidentStore {
 
     // Computed: aggregated time-series data
     timeSeriesData = computed(() => {
+
         const incidents = this.filteredIncidents();
         const resolution = this.resolution();
 
-        // Calculate bucket size
         const bucketMillis = this.getResolutionInMillis(resolution);
-        const buckets = new Map<number, number>();
 
-        // Aggregate incidents into buckets
-        incidents.forEach(incident => {
-            const timestamp = incident.startTime.getTime();
-            const bucketStart = Math.floor(timestamp / bucketMillis) * bucketMillis;
+        // ---- SAFETY: raw resolution or invalid bucket ----
+        if (!bucketMillis || bucketMillis <= 0) {
+            return this.aggregateRaw(incidents);
+        }
 
-            buckets.set(bucketStart, (buckets.get(bucketStart) || 0) + 1);
+        // ---- OPTIONAL: use visible range if you have one ----
+        if (!this.startTime()) {
+            this.startTime.set(Math.min(...incidents.map(i => +new Date(i.startTime))));
+        }
+
+        if (!this.endTime()) {
+            this.endTime.set(Math.max(...incidents.map(i => +new Date(i.startTime))));
+        }
+
+        const rangeStart = this.startTime();
+        const rangeEnd = this.endTime();
+
+        console.log('[Store] Aggregating incidents into time-series with resolution:', resolution, 'Bucket size (ms):', bucketMillis, 'Time range:', new Date(rangeStart).toLocaleString(), '-', new Date(rangeEnd).toLocaleString());
+
+        if (!isFinite(rangeStart) || !isFinite(rangeEnd)) {
+            return { critical: [], warning: [], info: [] };
+        }
+
+        // ---- ALIGN RANGE TO BUCKETS ----
+        const alignedStart = Math.floor(rangeStart / bucketMillis) * bucketMillis;
+        const alignedEnd = Math.ceil(rangeEnd / bucketMillis) * bucketMillis;
+
+        // ---- CREATE UNIFIED BUCKET TIMELINE ----
+        const critical = new Map<number, number>();
+        const warning = new Map<number, number>();
+        const info = new Map<number, number>();
+
+        for (let t = alignedStart; t <= alignedEnd; t += bucketMillis) {
+            critical.set(t, 0);
+            warning.set(t, 0);
+            info.set(t, 0);
+        }
+
+        // ---- AGGREGATE INCIDENTS ----
+        for (const incident of incidents) {
+
+            const ts = +new Date(incident.startTime);
+            if (!isFinite(ts)) continue;
+
+            const bucket = Math.floor(ts / bucketMillis) * bucketMillis;
+
+            switch (incident.severity) {
+                case IncidentSeverity.Critical:
+                    critical.set(bucket, (critical.get(bucket) ?? 0) + 1);
+                    break;
+
+                case IncidentSeverity.Warning:
+                    warning.set(bucket, (warning.get(bucket) ?? 0) + 1);
+                    break;
+
+                case IncidentSeverity.Info:
+                    info.set(bucket, (info.get(bucket) ?? 0) + 1);
+                    break;
+            }
+        }
+
+        // ---- MAP → SORTED ARRAYS (already sorted if inserted sequentially, but safe) ----
+        const toSeries = (map: Map<number, number>) =>
+            Array.from(map.entries())
+                .map(([timestamp, value]) => ({ timestamp, value }))
+                .sort((a, b) => a.timestamp - b.timestamp);
+        console.log('Aggregated time-series data:', {
+            critical: toSeries(critical),
+            warning: toSeries(warning),
+            info: toSeries(info)
         });
-
-        // Convert to sorted array
-        return Array.from(buckets.entries())
-            .map(([timestamp, count]) => ({ timestamp, value: count }))
-            .sort((a, b) => a.timestamp - b.timestamp);
+        return {
+            critical: toSeries(critical),
+            warning: toSeries(warning),
+            info: toSeries(info)
+        };
     });
+
+    private aggregateRaw(incidents: Incident[]) {
+
+        const toSeries = (severity: IncidentSeverity) =>
+            incidents
+                .filter(i => i.severity === severity)
+                .map(i => ({
+                    timestamp: +new Date(i.startTime),
+                    value: 1
+                }))
+                .sort((a, b) => a.timestamp - b.timestamp);
+
+        return {
+            critical: toSeries(IncidentSeverity.Critical),
+            warning: toSeries(IncidentSeverity.Warning),
+            info: toSeries(IncidentSeverity.Info)
+        };
+    }
 
     constructor() {
         effect(() => {
-            const ready = this.pageReady();
-            if (!ready) {
-                this.lastStreamKey = null;
-                this.incidentService.disconnect();
-                return;
-            }
-
             const filters = this.filterStore.filters();
             if (!filters.startDate || !filters.endDate) {
                 return;
             }
-
+            console.log('[Store] Filters changed - start:', filters.startDate, 'end:', filters.endDate);
             const start = new Date(filters.startDate).getTime();
             const end = new Date(filters.endDate).setHours(23, 59, 59, 999);
 
@@ -117,13 +189,6 @@ export class IncidentStore {
             this.lastStreamKey = key;
             this.incidentService.connectToIncidentsStream(start, end);
         });
-    }
-
-    /**
-     * Mark the page as ready to load incident data.
-     */
-    setPageReady(ready: boolean): void {
-        this.pageReady.set(ready);
     }
 
     /**

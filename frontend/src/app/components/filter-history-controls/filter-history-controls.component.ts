@@ -1,6 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FilterHistoryStore } from '../../stores/filter-history.store';
+import { HistoryStore } from '../../stores/filter-history.store';
 
 @Component({
     selector: 'app-filter-history-controls',
@@ -13,7 +13,7 @@ export class FilterHistoryControlsComponent {
     @Output() back = new EventEmitter<void>();
     @Output() forward = new EventEmitter<void>();
 
-    constructor(private filterStore: FilterHistoryStore) { }
+    constructor(private filterStore: HistoryStore) { }
 
     // Use computed signals from store
     get canGoBack() {

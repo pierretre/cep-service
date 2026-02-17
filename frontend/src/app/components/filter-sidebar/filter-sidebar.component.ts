@@ -2,8 +2,9 @@ import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterHistoryControlsComponent } from '../filter-history-controls/filter-history-controls.component';
-import { FilterHistoryStore, FilterConfig } from '../../stores/filter-history.store';
+import { HistoryStore } from '../../stores/filter-history.store';
 import { FilterStore } from '../../stores/filter.store';
+import { FilterConfig } from '../../models/filter-config.model';
 
 @Component({
     selector: 'app-filter-sidebar',
@@ -18,7 +19,7 @@ export class FilterSidebarComponent implements OnInit {
     }
 
     constructor(
-        private historyStore: FilterHistoryStore,
+        private historyStore: HistoryStore,
         protected filterStore: FilterStore
     ) { }
 
@@ -44,15 +45,6 @@ export class FilterSidebarComponent implements OnInit {
     onFilterChange(): void {
         // Automatically save to history when filters change
         this.historyStore.saveState(this.filters);
-    }
-
-    updateSeverity(level: keyof FilterConfig['severityLevels'], value: boolean): void {
-        this.filterStore.updateSeverityLevels({ [level]: value });
-        this.onFilterChange();
-    }
-
-    updateDateRange(startDate: string, endDate: string): void {
-        this.filterStore.updateFilters({ startDate, endDate });
-        this.onFilterChange();
+        this.filterStore.updateFilters(this.filters);
     }
 }

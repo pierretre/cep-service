@@ -1,20 +1,10 @@
 import { Injectable, signal, computed } from '@angular/core';
-
-export interface FilterConfig {
-    startDate: string;
-    endDate: string;
-    severityLevels: {
-        critical: boolean;
-        high: boolean;
-        medium: boolean;
-        low: boolean;
-    };
-}
+import { FilterConfig } from '../models/filter-config.model';
 
 @Injectable({
     providedIn: 'root'
 })
-export class FilterHistoryStore {
+export class HistoryStore {
     // Signals
     private history = signal<FilterConfig[]>([]);
     private currentIndex = signal<number>(-1);
