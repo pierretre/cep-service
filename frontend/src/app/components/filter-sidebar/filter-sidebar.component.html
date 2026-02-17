@@ -32,22 +32,16 @@
                     <label for="severity-critical" class="ml-2 text-sm font-medium text-gray-900">Critical</label>
                 </div>
                 <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.high" (ngModelChange)="onFilterChange()"
-                        id="severity-high" type="checkbox"
+                    <input [(ngModel)]="filters.severityLevels.warning" (ngModelChange)="onFilterChange()"
+                        id="severity-warning" type="checkbox"
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                    <label for="severity-high" class="ml-2 text-sm font-medium text-gray-900">High</label>
+                    <label for="severity-warning" class="ml-2 text-sm font-medium text-gray-900">Warning</label>
                 </div>
                 <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.medium" (ngModelChange)="onFilterChange()"
-                        id="severity-medium" type="checkbox"
+                    <input [(ngModel)]="filters.severityLevels.info" (ngModelChange)="onFilterChange()"
+                        id="severity-info" type="checkbox"
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                    <label for="severity-medium" class="ml-2 text-sm font-medium text-gray-900">Medium</label>
-                </div>
-                <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.low" (ngModelChange)="onFilterChange()" id="severity-low"
-                        type="checkbox"
-                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                    <label for="severity-low" class="ml-2 text-sm font-medium text-gray-900">Low</label>
+                    <label for="severity-info" class="ml-2 text-sm font-medium text-gray-900">Info</label>
                 </div>
             </div>
         </div>

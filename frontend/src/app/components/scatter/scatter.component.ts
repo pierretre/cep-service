@@ -95,24 +95,16 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             },
             tooltip: {
                 trigger: 'axis',
-                axisPointer: {
-                    type: 'cross'
-                },
+                axisPointer: { type: 'cross' },
                 formatter: (params: any) => {
                     if (!params || params.length === 0) return '';
                     const point = params[0];
                     const date = new Date(point.value[0]);
-                    const count = point.value[1];
+                    const count = params.reduce((sum: number, p: any) => sum + p.value[1], 0);
                     return `${date.toLocaleString()}<br/>Incidents: ${count}`;
                 }
             },
-            grid: {
-                left: '5%',
-                right: '5%',
-                bottom: '15%',
-                top: '15%',
-                containLabel: true
-            },
+            grid: { left: '5%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
             xAxis: {
                 type: 'time',
                 name: 'Time',
@@ -130,7 +122,8 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
                     type: 'inside',
                     xAxisIndex: 0,
                     start: 0,
-                    end: 100
+                    end: 100,
+                    zoomLock: false
                 },
                 {
                     type: 'slider',
@@ -147,27 +140,21 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
                     type: 'line',
                     stack: 'total',
                     data: this.aggregatedData.critical,
-                    itemStyle: {
-                        color: '#ef4444' // red
-                    }
+                    itemStyle: { color: '#ef4444' }
                 },
                 {
                     name: 'Warning',
                     type: 'line',
                     stack: 'total',
                     data: this.aggregatedData.warning,
-                    itemStyle: {
-                        color: '#f97316' // orange
-                    }
+                    itemStyle: { color: '#f97316' }
                 },
                 {
                     name: 'Info',
                     type: 'line',
                     stack: 'total',
                     data: this.aggregatedData.info,
-                    itemStyle: {
-                        color: '#eab308' // yellow
-                    }
+                    itemStyle: { color: '#eab308' }
                 }
             ]
         };

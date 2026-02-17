@@ -3,8 +3,7 @@ export interface FilterConfig {
     endDate: string;
     severityLevels: {
         critical: boolean;
-        high: boolean;
-        medium: boolean;
-        low: boolean;
+        warning: boolean;
+        info: boolean;
     };
 }

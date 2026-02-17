@@ -14,9 +14,8 @@ export class FilterStore {
         endDate: this.getDefaultEndDate(),
         severityLevels: {
             critical: true,
-            high: true,
-            medium: true,
-            low: true
+            warning: true,
+            info: true
         }
     });
 
@@ -52,9 +51,8 @@ export class FilterStore {
             endDate: this.getDefaultEndDate(),
             severityLevels: {
                 critical: true,
-                high: true,
-                medium: true,
-                low: true
+                warning: true,
+                info: true,
             }
         });
     }
