@@ -37,13 +37,13 @@ export class HomeComponent {
     ) { }
 
     exportData(): void {
-        const visibleStart = this.getVisibleStartTime();
-        const visibleEnd = this.getVisibleEndTime();
+        const visibleStart = this.filterStore.filters().startDate;
+        const visibleEnd = this.filterStore.filters().endDate;
 
         const incidents = this.incidentStore.filteredIncidents()
             .filter(incident => {
                 const time = incident.startTime.getTime();
-                return time >= visibleStart && time <= visibleEnd;
+                return time >= new Date(visibleStart).getTime() && time <= new Date(visibleEnd).getTime();
             })
             .map(incident => ({
                 ...incident,
@@ -70,18 +70,6 @@ export class HomeComponent {
         link.download = `incidents-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
         link.click();
         URL.revokeObjectURL(url);
-    }
-
-    private getVisibleStartTime(): number {
-        const visibleStart = this.incidentStore.visibleStartTime();
-        const start = this.incidentStore.startTime();
-        return isFinite(visibleStart) && visibleStart > 0 ? visibleStart : start;
-    }
-
-    private getVisibleEndTime(): number {
-        const visibleEnd = this.incidentStore.visibleEndTime();
-        const end = this.incidentStore.endTime();
-        return isFinite(visibleEnd) && visibleEnd > 0 ? visibleEnd : end;
     }
 
     onScatterSelection(event: any): void {

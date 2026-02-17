@@ -12,11 +12,13 @@ export class FilterStore {
     private filterState = signal<FilterConfig>({
         startDate: this.getDefaultStartDate(),
         endDate: this.getDefaultEndDate(),
+        liveMode: true,
         severityLevels: {
             critical: true,
             warning: true,
             info: true
-        }
+        },
+        selectedRules: []
     });
 
     // Computed signals
@@ -49,21 +51,23 @@ export class FilterStore {
         this.filterState.set({
             startDate: this.getDefaultStartDate(),
             endDate: this.getDefaultEndDate(),
+            liveMode: true,
             severityLevels: {
                 critical: true,
                 warning: true,
                 info: true,
-            }
+            },
+            selectedRules: []
         });
     }
 
-    private getDefaultStartDate(): string {
+    private getDefaultStartDate(): Date {
         const date = new Date();
         date.setDate(date.getDate() - 7);
-        return date.toISOString().split('T')[0];
+        return date;
     }
 
-    private getDefaultEndDate(): string {
-        return new Date().toISOString().split('T')[0];
+    private getDefaultEndDate(): Date {
+        return new Date();
     }
 }

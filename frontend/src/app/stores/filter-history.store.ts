@@ -29,8 +29,14 @@ export class HistoryStore {
      * Save a new filter state to history
      */
     saveState(filters: FilterConfig): void {
-        // Deep clone the filters to avoid reference issues
-        const clonedFilters = JSON.parse(JSON.stringify(filters));
+        // Deep clone the filters, converting dates to strings for storage
+        const clonedFilters = {
+            ...filters,
+            startDate: filters.startDate instanceof Date ? filters.startDate : new Date(filters.startDate),
+            endDate: filters.endDate instanceof Date ? filters.endDate : new Date(filters.endDate),
+            severityLevels: { ...filters.severityLevels },
+            selectedRules: [...filters.selectedRules]
+        };
 
         // Remove any states after current index (for when user goes back then makes a new change)
         const newHistory = this.history().slice(0, this.currentIndex() + 1);
@@ -56,8 +62,16 @@ export class HistoryStore {
             this.currentIndex.update(idx => idx - 1);
             const index = this.currentIndex();
             const historyArray = this.history();
-            return JSON.parse(JSON.stringify(historyArray[index]));
+            const state = historyArray[index];
+            return {
+                ...state,
+                startDate: state.startDate instanceof Date ? state.startDate : new Date(state.startDate),
+                endDate: state.endDate instanceof Date ? state.endDate : new Date(state.endDate),
+                severityLevels: { ...state.severityLevels },
+                selectedRules: [...state.selectedRules]
+            };
         }
+
         return null;
     }
 
@@ -69,7 +83,14 @@ export class HistoryStore {
             this.currentIndex.update(idx => idx + 1);
             const index = this.currentIndex();
             const historyArray = this.history();
-            return JSON.parse(JSON.stringify(historyArray[index]));
+            const state = historyArray[index];
+            return {
+                ...state,
+                startDate: state.startDate instanceof Date ? state.startDate : new Date(state.startDate),
+                endDate: state.endDate instanceof Date ? state.endDate : new Date(state.endDate),
+                severityLevels: { ...state.severityLevels },
+                selectedRules: [...state.selectedRules]
+            };
         }
         return null;
     }

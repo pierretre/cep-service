@@ -13,6 +13,8 @@ import { EChartsOption, ECharts } from 'echarts';
 import { Subject } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { IncidentStore } from '../../stores/incident.store';
+import { FilterStore } from '../../stores/filter.store';
+import { Incident } from '../../models';
 
 @Component({
     selector: 'app-scatter',
@@ -21,7 +23,7 @@ import { IncidentStore } from '../../stores/incident.store';
     templateUrl: './scatter.component.html',
     styleUrls: ['./scatter.component.css']
 })
-export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ScatterComponent implements OnDestroy, AfterViewInit {
 
     @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
 
@@ -30,27 +32,24 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private destroy$ = new Subject<void>();
 
-    // Inject store
+    // Inject stores
     private incidentStore = inject(IncidentStore);
+    private filterStore = inject(FilterStore);
 
     constructor() {
         // React to incident changes
         effect(() => {
-            const incidents = this.incidentStore.incidents();
+            const incidents = this.incidentStore.filteredIncidents();
             console.log('[Component] Incidents updated - total count:', incidents.length);
-            this.updateChartData();
+            this.updateChartData(incidents);
         });
     }
 
-    ngOnInit(): void {
-    }
-
     ngAfterViewInit(): void {
-        console.log('[Component] Ready');
         // Initialize the chart instance here
         this.chartInstance = echarts.init(this.chartContainer.nativeElement);
-        this.updateChartData();
-        this.updateVisibleRangeFromChart();
+        this.updateChartData(this.incidentStore.filteredIncidents());
+
         // Click handling
         this.chartInstance.on('click', (params: any) => {
             if (!params || !params.data) return;
@@ -59,14 +58,8 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             if (!incidents || !incidents.length) return;
 
             // For simplicity, just log them
-            console.log('Clicked incidents in this bucket:', incidents);
+            console.log('Clicked incidents:', incidents);
 
-            // Or trigger your detail display logic
-            // e.g., this.openIncidentDetails(incidents);
-        });
-
-        this.chartInstance.on('datazoom', () => {
-            this.updateVisibleRangeFromChart();
         });
     }
 
@@ -78,22 +71,13 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    private updateChartData(visibleRange?: [number, number]): void {
+    private updateChartData(incidents: Array<Incident>): void {
         if (!this.chartInstance) return;
 
-        const incidents = this.incidentStore.incidents();
-        if (!incidents?.length) {
-            this.chartInstance.setOption({ series: [] }, true);
-            return;
-        }
-
-        // Filter by visible range if provided
-        const visibleIncidents = visibleRange
-            ? incidents.filter(i => {
-                const ts = i.startTime.getTime();
-                return ts >= visibleRange[0] && ts <= visibleRange[1];
-            })
-            : incidents;
+        // if (!incidents?.length) {
+        //     this.chartInstance.setOption({ series: [] }, true);
+        //     return;
+        // }
 
         // Map each incident to a point
         const seriesData: Record<'critical' | 'warning' | 'info', any[]> = {
@@ -102,7 +86,7 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             info: []
         };
 
-        visibleIncidents.forEach(i => {
+        incidents.forEach(i => {
             const key = i.severity.toLowerCase() as 'critical' | 'warning' | 'info';
             seriesData[key].push({
                 value: [i.startTime.getTime(), 1], // y=1 for scatter
@@ -112,11 +96,20 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.chartOption = {
             animation: false,
-            title: {
+            title: incidents.length > 0 ? {
                 text: 'Incident Count Over Time (Real-Time)',
                 left: 'center',
                 top: 10
-            },
+            } :
+                {
+                    show: true,
+                    textStyle: {
+                        color: '#bcbcbc'
+                    },
+                    text: 'No Data',
+                    left: 'center',
+                    top: 'center'
+                },
             tooltip: {
                 trigger: 'axis',
                 axisPointer: { type: 'cross' },
@@ -132,8 +125,8 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
             xAxis: {
                 type: 'time',
                 name: 'Time',
-                min: this.incidentStore.startTime(),
-                max: this.incidentStore.endTime()
+                min: new Date(this.filterStore.filters().startDate).getTime(),
+                max: new Date(this.filterStore.filters().endDate).getTime()
             },
             yAxis: {
                 type: 'value',
@@ -183,27 +176,5 @@ export class ScatterComponent implements OnInit, OnDestroy, AfterViewInit {
         };
 
         this.chartInstance.setOption(this.chartOption);
-        this.updateVisibleRangeFromChart();
-    }
-
-    private updateVisibleRangeFromChart(): void {
-        if (!this.chartInstance) return;
-
-        const option = this.chartInstance.getOption() as any;
-        const dataZoom = option?.dataZoom?.[0];
-        const startPercent = typeof dataZoom?.start === 'number' ? dataZoom.start : 0;
-        const endPercent = typeof dataZoom?.end === 'number' ? dataZoom.end : 100;
-
-        const min = this.incidentStore.startTime();
-        const max = this.incidentStore.endTime();
-
-        if (!isFinite(min) || !isFinite(max) || min >= max) {
-            return;
-        }
-
-        const visibleStart = min + ((max - min) * startPercent) / 100;
-        const visibleEnd = min + ((max - min) * endPercent) / 100;
-
-        this.incidentStore.setVisibleRange(visibleStart, visibleEnd);
     }
 }

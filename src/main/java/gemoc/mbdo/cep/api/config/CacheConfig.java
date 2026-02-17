@@ -18,14 +18,12 @@ public class CacheConfig {
 
     public static final String INCIDENTS_CACHE = "incidents";
     public static final String INCIDENT_BY_ID_CACHE = "incidentById";
-    public static final String TIME_SERIES_CACHE = "timeSeriesCache";
 
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 INCIDENTS_CACHE,
-                INCIDENT_BY_ID_CACHE,
-                TIME_SERIES_CACHE);
+                INCIDENT_BY_ID_CACHE);
         cacheManager.setCaffeine(caffeineCacheBuilder());
         return cacheManager;
     }

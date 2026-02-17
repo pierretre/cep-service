@@ -46,45 +46,6 @@ export class IncidentService {
     }
 
     /**
-     * Get paginated incidents from the API
-     */
-    getIncidentsPaginated(params: PaginationParams = {}): Observable<PaginatedResponse> {
-        const {
-            page = 0,
-            size = 20,
-            sortBy = 'createdAt',
-            sortDir = 'desc',
-            startTime,
-            endTime
-        } = params;
-
-        let httpParams = new HttpParams()
-            .set('page', page.toString())
-            .set('size', size.toString())
-            .set('sortBy', sortBy)
-            .set('sortDir', sortDir);
-
-        if (startTime !== undefined) {
-            httpParams = httpParams.set('startTime', startTime.toString());
-        }
-        if (endTime !== undefined) {
-            httpParams = httpParams.set('endTime', endTime.toString());
-        }
-
-        return this.http.get<any>(`${environment.apiUrl}/incidents/paginated`, { params: httpParams }).pipe(
-            map(response => ({
-                incidents: response.incidents.map(fromIncident),
-                currentPage: response.currentPage,
-                totalItems: response.totalItems,
-                totalPages: response.totalPages,
-                pageSize: response.pageSize,
-                hasNext: response.hasNext,
-                hasPrevious: response.hasPrevious
-            }))
-        );
-    }
-
-    /**
      * Get a specific incident by ID
      */
     getIncidentById(id: number): Observable<Incident> {

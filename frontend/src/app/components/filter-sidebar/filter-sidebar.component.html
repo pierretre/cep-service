@@ -1,23 +1,60 @@
-<aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+<aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto h-full">
     <div class="p-4">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
-            <app-filter-history-controls (back)="onBack()" (forward)="onForward()">
-            </app-filter-history-controls>
+            <div class="flex items-center gap-2">
+                <button type="button" (click)="onReset()" class="text-gray-600 hover:text-gray-900 focus:outline-none"
+                    title="Reset all filters">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                </button>
+                <app-filter-history-controls (back)="onBack()" (forward)="onForward()">
+                </app-filter-history-controls>
+            </div>
         </div>
 
         <!-- Date Range Filter -->
         <div class="mb-6">
-            <label class="block mb-2 text-sm font-medium text-gray-900">Date Range</label>
-            <div class="grid grid-cols-2 gap-2">
+            <label class="block mb-2 text-sm font-medium text-gray-900">Date & Time Range</label>
+            <div class="grid grid-cols-1 gap-2">
                 <div>
-                    <input [(ngModel)]="filters.startDate" (ngModelChange)="onFilterChange()" type="date"
+                    <label class="block mb-1 text-xs text-gray-600">Start</label>
+                    <input [value]="getStartDateTimeString()" [max]="getMaxStartDateTime()"
+                        (input)="onStartDateChange($event)" type="datetime-local"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
                 <div>
-                    <input [(ngModel)]="filters.endDate" (ngModelChange)="onFilterChange()" type="date"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <label class="block mb-1 text-xs text-gray-600">End</label>
+                    <input [value]="getEndDateTimeString()" [min]="getMinEndDateTime()" [disabled]="filters.liveMode"
+                        (input)="onEndDateChange($event)" type="datetime-local" [class.bg-gray-200]="filters.liveMode"
+                        [class.bg-gray-50]="!filters.liveMode"
+                        class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
+                <div class="flex items-center mt-2">
+                    <input [(ngModel)]="filters.liveMode" (ngModelChange)="onLiveModeChange()" id="live-mode"
+                        type="checkbox"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="live-mode" class="ml-2 text-sm font-medium text-gray-900">
+                        Live Mode
+                        <span class="ml-1 text-xs text-gray-500">(auto-sync end time)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Error Alert -->
+        <div *ngIf="dateRangeError()" class="mb-6 p-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200"
+            role="alert">
+            <div class="flex items-center">
+                <svg class="flex-shrink-0 w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                </svg>
+                <span class="font-medium">{{ dateRangeError() }}</span>
             </div>
         </div>
 
@@ -42,6 +79,51 @@
                         id="severity-info" type="checkbox"
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                     <label for="severity-info" class="ml-2 text-sm font-medium text-gray-900">Info</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rule Filter -->
+        <div class="mb-6 relative">
+            <label class="block mb-2 text-sm font-medium text-gray-900">Rules</label>
+            <button type="button" (click)="toggleRuleDropdown()"
+                class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 text-left flex justify-between items-center">
+                <span class="truncate">
+                    <span *ngIf="filters.selectedRules.length === 0" class="text-gray-500">Select rules...</span>
+                    <span *ngIf="filters.selectedRules.length > 0">{{ filters.selectedRules.length }} selected</span>
+                </span>
+                <svg class="w-4 h-4" [class.rotate-180]="isRuleDropdownOpen()" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+
+            <!-- Dropdown Panel -->
+            <div *ngIf="isRuleDropdownOpen()"
+                class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div class="p-2 space-y-1">
+                    <div *ngFor="let rule of availableRules()"
+                        class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
+                        (click)="onRuleToggle(rule.name)">
+                        <input [checked]="isRuleSelected(rule.name)" type="checkbox"
+                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 pointer-events-none">
+                        <label class="ml-2 text-sm font-medium text-gray-900 cursor-pointer" [title]="rule.description">
+                            {{ rule.name }}
+                        </label>
+                    </div>
+                    <div *ngIf="availableRules().length === 0" class="p-2 text-sm text-gray-500 italic">
+                        No rules available
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 p-2 flex justify-between">
+                    <button type="button" (click)="clearRuleSelection()"
+                        class="text-xs text-blue-600 hover:text-blue-800">
+                        Clear all
+                    </button>
+                    <button type="button" (click)="toggleRuleDropdown()"
+                        class="text-xs text-gray-600 hover:text-gray-800">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
