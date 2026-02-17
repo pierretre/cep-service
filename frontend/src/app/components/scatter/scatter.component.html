@@ -1,7 +1,10 @@
 <div class="flex flex-col h-full">
     <!-- Chart Container - Fixed to upper half -->
-    <div class="h-1/2 min-h-[400px] border-b border-gray-300">
+    <div class="h-1/2 min-h-[400px] border-b border-gray-300 relative">
         <div #chartContainer class="w-full h-full"></div>
+
+        <!-- Hover Info Overlay -->
+        <app-relate-hover [hoverInfo]="hoverInfo"></app-relate-hover>
     </div>
 
     <!-- Incident Details Panel - Lower half -->

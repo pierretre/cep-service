@@ -7,7 +7,10 @@ import {
     ViewChild,
     AfterViewInit,
     effect,
-    inject
+    inject,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    NgZone
 } from '@angular/core';
 import { EChartsOption, ECharts } from 'echarts';
 import { Subject } from 'rxjs';
@@ -16,13 +19,15 @@ import { IncidentStore } from '../../stores/incident.store';
 import { FilterStore } from '../../stores/filter.store';
 import { Incident } from '../../models';
 import { IncidentDetailsComponent } from '../incident-details/incident-details.component';
+import { RelateHoverComponent, RelateHoverInfo } from '../relate-hover/relate-hover.component';
 
 @Component({
     selector: 'app-scatter',
     standalone: true,
-    imports: [CommonModule, IncidentDetailsComponent],
+    imports: [CommonModule, IncidentDetailsComponent, RelateHoverComponent],
     templateUrl: './scatter.component.html',
-    styleUrls: ['./scatter.component.css']
+    styleUrls: ['./scatter.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScatterComponent implements OnDestroy, AfterViewInit {
 
@@ -31,20 +36,28 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
     chartInstance!: ECharts;
     chartOption!: EChartsOption;
     selectedIncident: Incident | null = null;
+    hoverInfo: RelateHoverInfo | null = null;
 
     private destroy$ = new Subject<void>();
     private currentZoom: { start: number; end: number } = { start: 0, end: 100 };
+    private hoverThrottleTimer: any = null;
+    private cachedRelatedIndices = new Map<string, number[]>();
 
     // Inject stores
     private incidentStore = inject(IncidentStore);
     private filterStore = inject(FilterStore);
+    private cdr = inject(ChangeDetectorRef);
+    private ngZone = inject(NgZone);
 
     constructor() {
         // React to incident changes
         effect(() => {
             const incidents = this.incidentStore.filteredIncidents();
             console.log('[Component] Incidents updated - total count:', incidents.length);
+            // Clear cache when incidents change
+            this.cachedRelatedIndices.clear();
             this.updateChartData(incidents);
+            this.cdr.markForCheck();
         });
     }
 
@@ -62,6 +75,9 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
 
             this.selectedIncident = incident;
             console.log('Selected incident:', incident);
+
+            // Highlight related incidents and show hover info
+            this.highlightRelatedIncidents(incident);
         });
 
         // Track zoom changes
@@ -75,11 +91,71 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
                 console.log('Zoom changed:', this.currentZoom);
             }
         });
+
+        // Highlight related incidents on hover (optimized with throttling)
+        this.chartInstance.on('mouseover', (params: any) => {
+            if (!params || !params.data || !params.data.incident) return;
+
+            // Throttle to prevent excessive updates
+            if (this.hoverThrottleTimer) return;
+
+            this.hoverThrottleTimer = setTimeout(() => {
+                this.hoverThrottleTimer = null;
+            }, 50); // 50ms throttle
+
+            const hoveredIncident = params.data.incident;
+            const severity = hoveredIncident.severity;
+            const cacheKey = `${hoveredIncident.rule.id}-${severity}`;
+
+            // Use cached indices if available
+            let relatedIndices = this.cachedRelatedIndices.get(cacheKey);
+            if (!relatedIndices) {
+                relatedIndices = this.getRelatedIncidentIndices(hoveredIncident);
+                this.cachedRelatedIndices.set(cacheKey, relatedIndices);
+            }
+
+            // Run inside Angular zone to update UI
+            this.ngZone.run(() => {
+                this.hoverInfo = {
+                    count: relatedIndices!.length,
+                    ruleName: hoveredIncident.rule.name,
+                    severity: severity
+                };
+                this.cdr.markForCheck();
+            });
+
+            // Highlight all incidents with same rule and severity
+            this.chartInstance.dispatchAction({
+                type: 'highlight',
+                seriesName: severity,
+                dataIndex: relatedIndices
+            });
+        });
+
+        this.chartInstance.on('mouseout', (params: any) => {
+            // Don't clear if an incident is selected
+            if (this.selectedIncident) return;
+
+            // Run inside Angular zone to update UI
+            this.ngZone.run(() => {
+                this.hoverInfo = null;
+                this.cdr.markForCheck();
+            });
+
+            // Clear all highlights
+            this.chartInstance.dispatchAction({
+                type: 'downplay',
+                seriesIndex: [0, 1, 2]
+            });
+        });
     }
 
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+        if (this.hoverThrottleTimer) {
+            clearTimeout(this.hoverThrottleTimer);
+        }
         if (this.chartInstance) {
             this.chartInstance.dispose();
         }
@@ -87,11 +163,6 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
 
     private updateChartData(incidents: Array<Incident>): void {
         if (!this.chartInstance) return;
-
-        // if (!incidents?.length) {
-        //     this.chartInstance.setOption({ series: [] }, true);
-        //     return;
-        // }
 
         // Map each incident to a point
         const seriesData: Record<'critical' | 'warning' | 'info', any[]> = {
@@ -111,7 +182,7 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         this.chartOption = {
             animation: false,
             title: incidents.length > 0 ? {
-                text: 'Incident Count Over Time (Real-Time)',
+                text: `Incident Count Over Time${this.filterStore.filters().liveMode ? ' (Real-Time)' : ''}`,
                 left: 'center',
                 top: 10
             } :
@@ -126,7 +197,6 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
                 },
             tooltip: {
                 trigger: 'axis',
-                axisPointer: { type: 'cross' },
                 formatter: (params: any) => {
                     if (!params || params.length === 0) return '';
                     const point = params[0];
@@ -170,21 +240,54 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
                     type: 'scatter',
                     stack: 'total',
                     data: seriesData.critical,
-                    itemStyle: { color: '#ef4444' }
+                    itemStyle: { color: '#ef4444' },
+                    emphasis: {
+                        focus: 'none',
+                        itemStyle: {
+                            color: '#dc2626',
+                            borderColor: '#000',
+                            borderWidth: 2,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(239, 68, 68, 0.5)'
+                        },
+                        scale: 1.5
+                    }
                 },
                 {
                     name: 'Warning',
                     type: 'scatter',
                     stack: 'total',
                     data: seriesData.warning,
-                    itemStyle: { color: '#f97316' }
+                    itemStyle: { color: '#f97316' },
+                    emphasis: {
+                        focus: 'none',
+                        itemStyle: {
+                            color: '#ea580c',
+                            borderColor: '#000',
+                            borderWidth: 2,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(249, 115, 22, 0.5)'
+                        },
+                        scale: 1.5
+                    }
                 },
                 {
                     name: 'Info',
                     type: 'scatter',
                     stack: 'total',
                     data: seriesData.info,
-                    itemStyle: { color: '#eab308' }
+                    itemStyle: { color: '#eab308' },
+                    emphasis: {
+                        focus: 'none',
+                        itemStyle: {
+                            color: '#ca8a04',
+                            borderColor: '#000',
+                            borderWidth: 2,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(234, 179, 8, 0.5)'
+                        },
+                        scale: 1.5
+                    }
                 }
             ]
         };
@@ -194,5 +297,64 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
 
     clearSelection(): void {
         this.selectedIncident = null;
+        this.hoverInfo = null;
+
+        // Clear all highlights
+        if (this.chartInstance) {
+            this.chartInstance.dispatchAction({
+                type: 'downplay',
+                seriesIndex: [0, 1, 2]
+            });
+        }
+
+        this.cdr.markForCheck();
+    }
+
+    private getRelatedIncidentIndices(hoveredIncident: Incident): number[] {
+        const ruleId = hoveredIncident.rule.id;
+        const severity = hoveredIncident.severity.toLowerCase();
+        const incidents = this.incidentStore.filteredIncidents();
+
+        const indices: number[] = [];
+        let currentIndex = 0;
+
+        incidents.forEach(incident => {
+            if (incident.severity.toLowerCase() === severity) {
+                if (incident.rule.id === ruleId) {
+                    indices.push(currentIndex);
+                }
+                currentIndex++;
+            }
+        });
+
+        return indices;
+    }
+
+    private highlightRelatedIncidents(incident: Incident): void {
+        const severity = incident.severity;
+        const cacheKey = `${incident.rule.id}-${severity}`;
+
+        // Use cached indices if available
+        let relatedIndices = this.cachedRelatedIndices.get(cacheKey);
+        if (!relatedIndices) {
+            relatedIndices = this.getRelatedIncidentIndices(incident);
+            this.cachedRelatedIndices.set(cacheKey, relatedIndices);
+        }
+
+        // Set hover info
+        this.hoverInfo = {
+            count: relatedIndices.length,
+            ruleName: incident.rule.name,
+            severity: severity
+        };
+
+        // Highlight all incidents with same rule and severity
+        this.chartInstance.dispatchAction({
+            type: 'highlight',
+            seriesName: severity,
+            dataIndex: relatedIndices
+        });
+
+        this.cdr.markForCheck();
     }
 }
