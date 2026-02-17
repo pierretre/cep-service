@@ -5,6 +5,7 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FilterSidebarComponent } from '../../components/filter-sidebar/filter-sidebar.component';
 import { FilterStore } from '../../stores/filter.store';
 import { IncidentStore } from '../../stores/incident.store';
+import { HamstersEvent } from '../../decorators/hamsters.decorator';
 
 interface SelectedData {
     startTime: Date;
@@ -36,6 +37,7 @@ export class HomeComponent {
         private incidentStore: IncidentStore
     ) { }
 
+    @HamstersEvent('exportData')
     exportData(): void {
         const visibleStart = this.filterStore.filters().startDate;
         const visibleEnd = this.filterStore.filters().endDate;

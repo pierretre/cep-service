@@ -3,6 +3,7 @@ import { Incident, IncidentSeverity } from '../models';
 import { FilterStore } from './filter.store';
 import { IncidentService } from '../services/incident.service';
 import { Subscription } from 'rxjs';
+import { HamstersEvent } from '../decorators/hamsters.decorator';
 
 /**
  * Store for managing incidents, time range, resolution, and severity filters.
