@@ -33,9 +33,15 @@ export class TimeseriesService {
             .set('end', end.toString())
             .set('resolution', resolution);
 
-        console.log('Fetching timeseries with params:', { start, end, resolution, filters });
         // Add filter parameters if provided
         if (filters) {
+            if (filters.status && filters.status !== 'all') {
+                params = params.set('status', filters.status);
+            }
+            if (filters.dataSource && filters.dataSource !== 'all') {
+                params = params.set('dataSource', filters.dataSource);
+            }
+
             // Add severity levels
             const severities: string[] = [];
             if (filters.severityLevels.critical) severities.push('critical');

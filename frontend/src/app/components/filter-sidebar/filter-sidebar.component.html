@@ -1,0 +1,55 @@
+<aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+    <div class="p-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
+            <app-filter-history-controls (back)="onBack()" (forward)="onForward()">
+            </app-filter-history-controls>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="mb-6">
+            <label class="block mb-2 text-sm font-medium text-gray-900">Date Range</label>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <input [(ngModel)]="filters.startDate" (ngModelChange)="onFilterChange()" type="date"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div>
+                    <input [(ngModel)]="filters.endDate" (ngModelChange)="onFilterChange()" type="date"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+            </div>
+        </div>
+
+        <!-- Severity Filter -->
+        <div class="mb-6">
+            <label class="block mb-2 text-sm font-medium text-gray-900">Severity</label>
+            <div class="space-y-2">
+                <div class="flex items-center">
+                    <input [(ngModel)]="filters.severityLevels.critical" (ngModelChange)="onFilterChange()"
+                        id="severity-critical" type="checkbox"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="severity-critical" class="ml-2 text-sm font-medium text-gray-900">Critical</label>
+                </div>
+                <div class="flex items-center">
+                    <input [(ngModel)]="filters.severityLevels.high" (ngModelChange)="onFilterChange()"
+                        id="severity-high" type="checkbox"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="severity-high" class="ml-2 text-sm font-medium text-gray-900">High</label>
+                </div>
+                <div class="flex items-center">
+                    <input [(ngModel)]="filters.severityLevels.medium" (ngModelChange)="onFilterChange()"
+                        id="severity-medium" type="checkbox"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="severity-medium" class="ml-2 text-sm font-medium text-gray-900">Medium</label>
+                </div>
+                <div class="flex items-center">
+                    <input [(ngModel)]="filters.severityLevels.low" (ngModelChange)="onFilterChange()" id="severity-low"
+                        type="checkbox"
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="severity-low" class="ml-2 text-sm font-medium text-gray-900">Low</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>

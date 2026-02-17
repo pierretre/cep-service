@@ -18,7 +18,7 @@ public class RuleResponse {
     @Schema(description = "Name of the rule", example = "HighTemperatureAlert")
     private String name;
 
-    @Schema(description = "EPL query for the rule", example = "select * from SensorEvent(temperature > 100)")
+    @Schema(description = "EPL query for the rule", example = "select * from Event(temperature > 100)")
     private String eplQuery;
 
     @Schema(description = "Description of the rule", example = "Alert when temperature exceeds 100 degrees")

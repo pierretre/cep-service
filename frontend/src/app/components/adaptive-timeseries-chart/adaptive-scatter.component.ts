@@ -4,13 +4,18 @@ import {
     OnDestroy,
     ElementRef,
     ViewChild,
-    AfterViewInit
+    AfterViewInit,
+    Output,
+    EventEmitter,
+    effect
 } from '@angular/core';
 import * as echarts from 'echarts';
 import { EChartsOption, ECharts } from 'echarts';
-import { Subject, debounceTime, switchMap, takeUntil } from 'rxjs';
-import { TimeseriesService } from '../../services/time-series-data.service';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
+import { SSETimeSeriesService } from '../../services/sse-timeseries.service';
 import { CommonModule } from '@angular/common';
+import { FilterStore } from '../../stores/filter.store';
+import { ZoomStore } from '../../stores/zoom.store';
 
 @Component({
     selector: 'app-adaptive-scatter',
@@ -22,36 +27,57 @@ import { CommonModule } from '@angular/common';
 export class AdaptiveScatterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
+    @Output() selectionChange = new EventEmitter<any>();
 
     chartInstance!: ECharts;
     chartOption!: EChartsOption;
 
     private zoomChange$ = new Subject<{ start: number; end: number }>();
     private destroy$ = new Subject<void>();
-
     private lastRequestKey = '';
+    private isInternalZoom = false;
+    private currentResolution = '';
+    private currentStart = 0;
+    private currentEnd = 0;
+    private currentDataSignal: any = null;
+    private lastDataLength = 0;
 
-    constructor(private dataService: TimeseriesService) { }
+    constructor(
+        private sseService: SSETimeSeriesService,
+        private filterStore: FilterStore,
+        private zoomStore: ZoomStore
+    ) {
+        // React to filter changes from store
+        effect(() => {
+            const filters = this.filterStore.filters();
+            if (filters.startDate && filters.endDate && !this.isInternalZoom) {
+                const start = new Date(filters.startDate).getTime();
+                const end = new Date(filters.endDate).setHours(23, 59, 59, 999);
+                this.zoomChange$.next({ start, end });
+            }
+        });
+    }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.initChartOption();
         this.setupZoomHandling();
     }
 
-    ngAfterViewInit() {
+    ngAfterViewInit(): void {
         this.initChart();
         this.loadInitialRange();
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
+        this.sseService.unsubscribeAll();
         if (this.chartInstance) {
             this.chartInstance.dispose();
         }
     }
 
-    private initChart() {
+    private initChart(): void {
         if (this.chartContainer) {
             this.chartInstance = echarts.init(this.chartContainer.nativeElement);
             this.chartInstance.setOption(this.chartOption);
@@ -128,9 +154,7 @@ export class AdaptiveScatterComponent implements OnInit, OnDestroy, AfterViewIni
                 {
                     type: 'scatter',
                     symbolSize: 8,
-                    itemStyle: {
-                        color: '#3b82f6'
-                    },
+                    color: '#3b82f6',
                     progressive: 5000,
                     progressiveThreshold: 10000,
                     data: []
@@ -139,10 +163,17 @@ export class AdaptiveScatterComponent implements OnInit, OnDestroy, AfterViewIni
         };
     }
 
-    private loadInitialRange() {
-        const now = Date.now();
-        const start = this.getEarliestDataTime();
-        this.zoomChange$.next({ start, end: now });
+    private loadInitialRange(): void {
+        const filters = this.filterStore.filters();
+        if (filters.startDate && filters.endDate) {
+            const start = new Date(filters.startDate).getTime();
+            const end = new Date(filters.endDate).setHours(23, 59, 59, 999);
+            this.zoomChange$.next({ start, end });
+        } else {
+            const now = Date.now();
+            const start = this.getEarliestDataTime();
+            this.zoomChange$.next({ start, end: now });
+        }
     }
 
     private getEarliestDataTime(): number {
@@ -150,40 +181,105 @@ export class AdaptiveScatterComponent implements OnInit, OnDestroy, AfterViewIni
         return Date.now() - 30 * 24 * 3600 * 1000;
     }
 
-    private setupZoomHandling() {
+    private setupZoomHandling(): void {
         this.zoomChange$
             .pipe(
                 debounceTime(200),
-                switchMap(range => {
-                    const resolution = this.computeResolution(range.start, range.end);
-
-                    const key = `${range.start}-${range.end}-${resolution}`;
-                    if (key === this.lastRequestKey) return [];
-
-                    this.lastRequestKey = key;
-                    if (this.chartInstance) {
-                        this.chartInstance.showLoading();
-                    }
-
-                    return this.dataService.getTimeseries(
-                        range.start,
-                        range.end,
-                        resolution
-                    );
-                }),
                 takeUntil(this.destroy$)
             )
-            .subscribe(data => {
-                if (!data || !this.chartInstance) return;
+            .subscribe(range => {
+                const resolution = this.computeResolution(range.start, range.end);
+                const isFirstLoad = !this.currentResolution;
 
-                const formatted = data.map(p => [p.timestamp, p.value]);
+                // Update zoom store
+                const reason = isFirstLoad ? 'initial' : (this.isInternalZoom ? 'filter' : 'zoom');
+                this.zoomStore.updateZoomState(range.start, range.end, resolution, reason);
+                this.currentResolution = resolution;
+                this.currentStart = range.start;
+                this.currentEnd = range.end;
 
-                this.chartInstance.setOption({
-                    series: [{ data: formatted }]
-                });
+                // Update filter store with new date range (unless change came from filters)
+                if (!this.isInternalZoom) {
+                    this.filterStore.updateDateRangeFromZoom(range.start, range.end);
+                }
+                this.isInternalZoom = false;
 
-                this.chartInstance.hideLoading();
+                // Create request key for deduplication
+                const key = `${range.start}-${range.end}-${resolution}`;
+                this.lastRequestKey = key;
+
+                if (this.chartInstance) {
+                    this.chartInstance.showLoading();
+                }
+
+                // Subscribe to SSE stream instead of making one-off request
+                const dataSignal = this.sseService.subscribeToTimeSeries(
+                    range.start,
+                    range.end,
+                    resolution,
+                    this.filterStore.filters()
+                );
+
+                this.currentDataSignal = dataSignal;
+                this.lastDataLength = 0;
+
+                // Set up an effect to react to data updates (in the constructor context)
+                // We'll handle this via a polling check within the Angular zone
+                this.checkAndUpdateChartData();
             });
+    }
+
+    private checkAndUpdateChartData(): void {
+        // Check for data updates and smoothly update chart
+        const checkInterval = setInterval(() => {
+            if (!this.currentDataSignal || !this.chartInstance) {
+                clearInterval(checkInterval);
+                return;
+            }
+
+            const data = this.currentDataSignal();
+            if (data && data.length > 0) {
+                // Check if data has changed (not just length)
+                const currentOption = this.chartInstance.getOption() as any;
+                const existingData = currentOption.series?.[0]?.data as any[] || [];
+
+                // Only update if data actually changed
+                if (data.length !== this.lastDataLength || this.hasDataChanged(data, existingData)) {
+                    this.lastDataLength = data.length;
+
+                    const formatted = data.map((p: any) => [p.timestamp, p.value]);
+
+                    // Use a slight merge animation for smooth transitions
+                    this.chartInstance.setOption({
+                        series: [{
+                            data: formatted,
+                            animationDuration: 300, // Smooth animation
+                            animationEasing: 'linear'
+                        }]
+                    }, { replaceMerge: ['series'] });
+                }
+            }
+        }, 100); // Check every 100ms for updates
+
+        // Clean up interval on destroy
+        this.destroy$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+            clearInterval(checkInterval);
+        });
+    }
+
+    private hasDataChanged(newData: any[], existingData: any[]): boolean {
+        if (newData.length !== existingData.length) {
+            return true;
+        }
+        // Check if any data point has changed
+        for (let i = 0; i < newData.length; i++) {
+            if (existingData[i] === undefined ||
+                newData[i].timestamp !== existingData[i][0] ||
+                newData[i].value !== existingData[i][1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private onDataZoom() {

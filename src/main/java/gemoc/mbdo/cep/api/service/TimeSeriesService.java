@@ -46,6 +46,12 @@ public class TimeSeriesService {
 
             System.out.println("Found " + incidents.size() + " incidents in time range");
 
+            // If no incidents, return empty data points
+            if (incidents.isEmpty()) {
+                System.out.println("No incidents found, returning empty data points");
+                return new TimeSeriesResponse(new ArrayList<>(), resolution, start, end);
+            }
+
             // Compute bucket size based on resolution
             long bucketMillis = getResolutionInMillis(resolution);
 
@@ -65,18 +71,11 @@ public class TimeSeriesService {
 
     /**
      * Aggregate incidents into time buckets
+     * Only creates data points for periods that have incidents
      */
     private List<TimePoint> aggregateIncidents(List<Incident> incidents, Long start, Long end, long bucketMillis) {
         // Create a map to count incidents per bucket
         Map<Long, Long> bucketCounts = new HashMap<>();
-
-        // Initialize all buckets with 0 (including up to current time)
-        long currentTime = System.currentTimeMillis();
-        long effectiveEnd = Math.min(end, currentTime);
-
-        for (long timestamp = start; timestamp <= effectiveEnd; timestamp += bucketMillis) {
-            bucketCounts.put(timestamp, 0L);
-        }
 
         // Count incidents in each bucket
         for (Incident incident : incidents) {
@@ -89,16 +88,88 @@ public class TimeSeriesService {
             long bucketStart = (incidentMillis / bucketMillis) * bucketMillis;
 
             // Ensure bucket is within range
-            if (bucketStart >= start && bucketStart <= effectiveEnd) {
+            if (bucketStart >= start && bucketStart <= end) {
                 bucketCounts.merge(bucketStart, 1L, Long::sum);
             }
         }
 
         // Convert to TimePoint list and sort by timestamp
+        // Only include buckets that have incidents (count > 0)
         return bucketCounts.entrySet().stream()
                 .map(entry -> new TimePoint(entry.getKey(), entry.getValue().doubleValue()))
                 .sorted(Comparator.comparing(TimePoint::getTimestamp))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Get time-series data for incidents with specified resolution and filters
+     */
+    @Cacheable(value = "timeSeriesCache", key = "#start + '_' + #end + '_' + #resolution + '_' + #severities")
+    public TimeSeriesResponse getTimeSeriesData(Long start, Long end, String resolution, String severities) {
+        try {
+            // Convert milliseconds to LocalDateTime
+            LocalDateTime startTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(start), ZoneId.systemDefault());
+            LocalDateTime endTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(end), ZoneId.systemDefault());
+
+            System.out.println("Fetching filtered time-series data from " + startTime + " to " + endTime +
+                    " with resolution " + resolution);
+
+            // Fetch incidents in the time range
+            List<Incident> incidents = incidentRepository.findByStartTimeBetween(
+                    startTime, endTime, org.springframework.data.domain.Pageable.unpaged())
+                    .getContent();
+
+            System.out.println("Found " + incidents.size() + " incidents before filtering");
+
+            // Apply filters
+            incidents = applyFilters(incidents, severities);
+
+            System.out.println("Found " + incidents.size() + " incidents after filtering");
+
+            // If no incidents, return empty data points
+            if (incidents.isEmpty()) {
+                System.out.println("No incidents found, returning empty data points");
+                return new TimeSeriesResponse(new ArrayList<>(), resolution, start, end);
+            }
+
+            // Compute bucket size based on resolution
+            long bucketMillis = getResolutionInMillis(resolution);
+
+            // Aggregate incidents into time buckets
+            List<TimePoint> points = aggregateIncidents(incidents, start, end, bucketMillis);
+
+            System.out.println("Generated " + points.size() + " time points");
+
+            return new TimeSeriesResponse(points, resolution, start, end);
+        } catch (Exception e) {
+            System.err.println("Error generating time-series data: " + e.getMessage());
+            e.printStackTrace();
+            return new TimeSeriesResponse(new ArrayList<>(), resolution, start, end);
+        }
+    }
+
+    /**
+     * Apply filters to incident list
+     */
+    private List<Incident> applyFilters(List<Incident> incidents, String severities) {
+        List<Incident> filtered = incidents;
+
+        // Filter by severities if provided
+        if (severities != null && !severities.isEmpty()) {
+            Set<String> severitySet = Arrays.stream(severities.split(","))
+                    .map(String::trim)
+                    .map(String::toLowerCase)
+                    .collect(Collectors.toSet());
+
+            filtered = filtered.stream()
+                    .filter(i -> i.getSeverity() != null &&
+                            severitySet.contains(i.getSeverity().toString().toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        return filtered;
     }
 
     /**

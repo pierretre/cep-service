@@ -12,7 +12,7 @@ public class RuleRequest {
     @Schema(description = "Unique name of the rule", example = "HighTemperatureAlert", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = "EPL (Event Processing Language) query for the rule", example = "select * from SensorEvent(temperature > 100)", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "EPL (Event Processing Language) query for the rule", example = "select * from Event(temperature > 100)", requiredMode = Schema.RequiredMode.REQUIRED)
     private String eplQuery;
 
     @Schema(description = "Human-readable description of the rule", example = "Alert when temperature exceeds 100 degrees")

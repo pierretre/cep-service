@@ -24,8 +24,6 @@ public class KafkaEventConsumer {
 
     @KafkaListener(topics = "events", groupId = "cep-engine-consumer")
     public void consumeEvents(Event event) {
-        log.info("Message received: {}", event);
-
         engine.sendEvent(event);
     }
 }
