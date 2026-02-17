@@ -15,11 +15,12 @@ import { CommonModule } from '@angular/common';
 import { IncidentStore } from '../../stores/incident.store';
 import { FilterStore } from '../../stores/filter.store';
 import { Incident } from '../../models';
+import { IncidentDetailsComponent } from '../incident-details/incident-details.component';
 
 @Component({
     selector: 'app-scatter',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, IncidentDetailsComponent],
     templateUrl: './scatter.component.html',
     styleUrls: ['./scatter.component.css']
 })
@@ -29,6 +30,7 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
 
     chartInstance!: ECharts;
     chartOption!: EChartsOption;
+    selectedIncident: Incident | null = null;
 
     private destroy$ = new Subject<void>();
 
@@ -54,12 +56,11 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         this.chartInstance.on('click', (params: any) => {
             if (!params || !params.data) return;
 
-            const incidents = params.data.incidents;
-            if (!incidents || !incidents.length) return;
+            const incident = params.data.incident;
+            if (!incident) return;
 
-            // For simplicity, just log them
-            console.log('Clicked incidents:', incidents);
-
+            this.selectedIncident = incident;
+            console.log('Selected incident:', incident);
         });
     }
 
@@ -176,5 +177,9 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         };
 
         this.chartInstance.setOption(this.chartOption);
+    }
+
+    clearSelection(): void {
+        this.selectedIncident = null;
     }
 }

@@ -1,0 +1,67 @@
+<div *ngIf="incident" class="border-t border-gray-300 bg-white p-6 shadow-lg h-full overflow-y-auto">
+    <div class="flex justify-between items-start mb-4">
+        <h3 class="text-xl font-semibold text-gray-800">Incident Details</h3>
+        <button (click)="onClose()" class="text-gray-500 hover:text-gray-700 transition-colors"
+            aria-label="Close preview">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Left Column -->
+        <div class="space-y-3">
+            <div>
+                <label class="text-sm font-medium text-gray-600">Severity</label>
+                <div class="mt-1">
+                    <span
+                        [class]="'inline-block px-3 py-1 rounded-full text-sm font-medium border ' + getSeverityClass(incident.severity)">
+                        {{ incident.severity }}
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">Message</label>
+                <p class="text-gray-900 mt-1">{{ incident.message }}</p>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">Start Time</label>
+                <p class="text-gray-900">{{ incident.startTime | date:'medium' }}</p>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">Created At</label>
+                <p class="text-gray-900">{{ incident.createdAt | date:'medium' }}</p>
+            </div>
+
+            <div *ngIf="incident.updatedAt">
+                <label class="text-sm font-medium text-gray-600">Updated At</label>
+                <p class="text-gray-900">{{ incident.updatedAt | date:'medium' }}</p>
+            </div>
+        </div>
+
+        <!-- Right Column - Rule Information -->
+        <div class="space-y-3 bg-gray-50 p-4 rounded-lg">
+            <h4 class="text-lg font-semibold text-gray-800 mb-3">Associated Rule</h4>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">Rule Name</label>
+                <p class="text-gray-900">{{ incident.rule.name }}</p>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">Description</label>
+                <p class="text-gray-900">{{ incident.rule.description }}</p>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium text-gray-600">EPL Query</label>
+                <pre
+                    class="text-xs text-gray-900 bg-white p-2 rounded border border-gray-200 mt-1 overflow-x-auto">{{ incident.rule.eplQuery }}</pre>
+            </div>
+        </div>
+    </div>
+</div>

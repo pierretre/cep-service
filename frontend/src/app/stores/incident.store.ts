@@ -3,7 +3,6 @@ import { Incident, IncidentSeverity } from '../models';
 import { FilterStore } from './filter.store';
 import { IncidentService } from '../services/incident.service';
 import { Subscription } from 'rxjs';
-import { HamstersEvent } from '../decorators/hamsters.decorator';
 
 /**
  * Store for managing incidents, time range, resolution, and severity filters.
@@ -86,15 +85,13 @@ export class IncidentStore {
     }
 
     private applyFilters() {
-        console.log('[Store] Applying filters to incidents');
-
-        console.log('[Store] selected rules:', this.filterStore.filters().selectedRules);
-
         const filters = this.filterStore.filters();
         const start = filters.startDate.getTime();
         const end = filters.endDate.setHours(23, 59, 59, 999);
         const selectedRules = filters.selectedRules;
         const liveMode = filters.liveMode;
+
+        console.log(`[Store] Before filtering, total incidents: ${this.incidents.length}`);
 
         this.filteredIncidents.set(this.incidents.filter(incident => {
             const incidentTime = incident.startTime.getTime();
@@ -125,7 +122,7 @@ export class IncidentStore {
                 return selectedRules.includes(incident.rule.name);
             }
 
-            return true;
+            return false;
         }));
 
         console.log(`[Store] Filtered incidents count: ${this.filteredIncidents().length}`);

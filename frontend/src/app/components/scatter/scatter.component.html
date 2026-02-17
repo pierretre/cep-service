@@ -1,1 +1,12 @@
-<div #chartContainer class="w-full h-full min-h-[600px]"></div>
+<div class="flex flex-col h-full">
+    <!-- Chart Container - Fixed to upper half -->
+    <div class="h-1/2 min-h-[400px] border-b border-gray-300">
+        <div #chartContainer class="w-full h-full"></div>
+    </div>
+
+    <!-- Incident Details Panel - Lower half -->
+    <div class="h-1/2">
+        <app-incident-details [incident]="selectedIncident" (close)="clearSelection()">
+        </app-incident-details>
+    </div>
+</div>
