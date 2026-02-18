@@ -40,8 +40,8 @@ export class HomeComponent implements OnInit {
     @HamstersEvent('User accesses the overview')
     ngOnInit(): void { }
 
-    @HamstersEvent('exportData')
-    exportData(): void {
+    @HamstersEvent('User triggers full extraction')
+    onFullExtraction(): void {
         const visibleStart = this.filterStore.filters().startDate;
         const visibleEnd = this.filterStore.filters().endDate;
 

@@ -46,7 +46,7 @@
         </div>
 
         <!-- Date Range Error Alert -->
-        <div *ngIf="dateRangeError()" class="mb-6 p-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200"
+        <div *ngIf="dateRangeError" class="mb-6 p-4 text-sm text-red-800 rounded-lg bg-red-50 border border-red-200"
             role="alert">
             <div class="flex items-center">
                 <svg class="flex-shrink-0 w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -54,8 +54,16 @@
                     <path
                         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
                 </svg>
-                <span class="font-medium">{{ dateRangeError() }}</span>
+                <span class="font-medium">{{ dateRangeError }}</span>
             </div>
+        </div>
+
+        <!-- Incident Search -->
+        <div class="mb-6">
+            <label class="block mb-2 text-sm font-medium text-gray-900">Search Incidents</label>
+            <input type="text" [(ngModel)]="filters.incidentSearchTerm" (ngModelChange)="onIncidentSearchChange()" 
+                placeholder="Search by any field..." autocomplete="off"
+                class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
         </div>
 
         <!-- Severity Filter -->
@@ -89,20 +97,20 @@
             <button type="button" (click)="toggleRuleDropdown()"
                 class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 text-left flex justify-between items-center">
                 <span class="truncate">
-                    <span *ngIf="filters.selectedRules.length === 0" class="text-gray-500">Select rules...</span>
-                    <span *ngIf="filters.selectedRules.length > 0">{{ filters.selectedRules.length }} selected</span>
+                    <span *ngIf="!filters.selectedRules || filters.selectedRules.length === 0" class="text-gray-500">Select rules...</span>
+                    <span *ngIf="filters.selectedRules && filters.selectedRules.length > 0">{{ filters.selectedRules.length }} selected</span>
                 </span>
-                <svg class="w-4 h-4" [class.rotate-180]="isRuleDropdownOpen()" fill="none" stroke="currentColor"
+                <svg class="w-4 h-4" [class.rotate-180]="isRuleDropdownOpen" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
 
             <!-- Dropdown Panel -->
-            <div *ngIf="isRuleDropdownOpen()"
+            <div *ngIf="isRuleDropdownOpen"
                 class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                 <div class="p-2 space-y-1">
-                    <div *ngFor="let rule of availableRules()"
+                    <div *ngFor="let rule of getFilteredRules()"
                         class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer"
                         (click)="onRuleToggle(rule.name)">
                         <input [checked]="isRuleSelected(rule.name)" type="checkbox"
@@ -111,7 +119,7 @@
                             {{ rule.name }}
                         </label>
                     </div>
-                    <div *ngIf="availableRules().length === 0" class="p-2 text-sm text-gray-500 italic">
+                    <div *ngIf="availableRules.length === 0" class="p-2 text-sm text-gray-500 italic">
                         No rules available
                     </div>
                 </div>

@@ -18,7 +18,8 @@ export class FilterStore {
             warning: true,
             info: true
         },
-        selectedRules: []
+        selectedRules: null,
+        incidentSearchTerm: ''
     });
 
     // Computed signals
@@ -57,7 +58,8 @@ export class FilterStore {
                 warning: true,
                 info: true,
             },
-            selectedRules: []
+            selectedRules: null,
+            incidentSearchTerm: ''
         });
     }
 

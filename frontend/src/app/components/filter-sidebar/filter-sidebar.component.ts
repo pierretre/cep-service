@@ -21,9 +21,10 @@ export class FilterSidebarComponent implements OnInit {
         return this.filterStore.filters();
     }
 
-    availableRules = signal<Rule[]>([]);
-    isRuleDropdownOpen = signal<boolean>(false);
-    dateRangeError = signal<string | null>(null);
+    availableRules: Rule[] = [];
+    isRuleDropdownOpen: boolean = false;
+    dateRangeError: string | null = null;
+    private searchTimeout: any = null;
 
     constructor(
         private historyStore: HistoryStore,
@@ -42,10 +43,10 @@ export class FilterSidebarComponent implements OnInit {
     loadRules(): void {
         this.ruleService.getAllRules().subscribe({
             next: (rules) => {
-                this.availableRules.set(rules);
+                this.availableRules = rules;
 
-                // If no rules are currently selected, select all by default
-                if (this.filters.selectedRules.length === 0 && rules.length > 0) {
+                // If no rules are currently selected (null or empty), select all by default
+                if ((!this.filters.selectedRules || this.filters.selectedRules.length === 0) && rules.length > 0) {
                     const allRuleNames = rules.map(rule => rule.name);
                     this.filterStore.updateFilters({ selectedRules: allRuleNames });
                     this.historyStore.saveState(this.filters);
@@ -111,11 +112,11 @@ export class FilterSidebarComponent implements OnInit {
         const endDate = this.filters.endDate;
 
         if (newDate > endDate) {
-            this.dateRangeError.set('Start date must be before end date');
+            this.dateRangeError = ('Start date must be before end date');
             return;
         }
 
-        this.dateRangeError.set(null);
+        this.dateRangeError = null;
         this.filterStore.updateFilters({ startDate: newDate });
         this.historyStore.saveState(this.filters);
     }
@@ -126,11 +127,11 @@ export class FilterSidebarComponent implements OnInit {
         const startDate = this.filters.startDate;
 
         if (newDate < startDate) {
-            this.dateRangeError.set('End date must be after start date');
+            this.dateRangeError = 'End date must be after start date';
             return;
         }
 
-        this.dateRangeError.set(null);
+        this.dateRangeError = null;
         this.filterStore.updateFilters({ endDate: newDate });
         this.historyStore.saveState(this.filters);
     }
@@ -153,15 +154,26 @@ export class FilterSidebarComponent implements OnInit {
     }
 
     toggleRuleDropdown(): void {
-        this.isRuleDropdownOpen.update(v => !v);
+        this.isRuleDropdownOpen = !this.isRuleDropdownOpen;
     }
 
     isRuleSelected(ruleName: string): boolean {
-        return this.filters.selectedRules.includes(ruleName);
+        return this.filters.selectedRules ? this.filters.selectedRules.includes(ruleName) : false;
+    }
+
+    getFilteredRules(): Rule[] {
+        const searchTerm = this.filters.incidentSearchTerm.toLowerCase();
+        if (!searchTerm) {
+            return this.availableRules;
+        }
+        return this.availableRules.filter(rule =>
+            rule.name.toLowerCase().includes(searchTerm) ||
+            rule.description?.toLowerCase().includes(searchTerm)
+        );
     }
 
     onRuleToggle(ruleName: string): void {
-        const currentRules = [...this.filters.selectedRules];
+        const currentRules = this.filters.selectedRules ? [...this.filters.selectedRules] : [];
         const index = currentRules.indexOf(ruleName);
 
         if (index >= 0) {
@@ -174,11 +186,25 @@ export class FilterSidebarComponent implements OnInit {
         this.historyStore.saveState(this.filters);
     }
 
+    onIncidentSearchChange(): void {
+        // Clear existing timeout
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        // Set new timeout - wait 500ms after user stops typing before updating filter
+        this.searchTimeout = setTimeout(() => {
+            this.filterStore.updateFilters({ incidentSearchTerm: this.filters.incidentSearchTerm });
+            this.historyStore.saveState(this.filters);
+        }, 500);
+    }
+
     clearRuleSelection(): void {
         this.filterStore.updateFilters({ selectedRules: [] });
         this.historyStore.saveState(this.filters);
     }
 
+    @HamstersEvent('User goes backward in history')
     onBack(): void {
         const previousState = this.historyStore.goBack();
         if (previousState) {
@@ -186,6 +212,7 @@ export class FilterSidebarComponent implements OnInit {
         }
     }
 
+    @HamstersEvent('User goes forward in history')
     onForward(): void {
         const nextState = this.historyStore.goForward();
         if (nextState) {
@@ -204,10 +231,11 @@ export class FilterSidebarComponent implements OnInit {
         this.filterStore.updateFilters(this.filters);
     }
 
+    @HamstersEvent('User triggers reset')
     onReset(): void {
         this.filterStore.resetFilters();
-        this.dateRangeError.set(null);
-        this.isRuleDropdownOpen.set(false);
+        this.dateRangeError = null;
+        this.isRuleDropdownOpen = false;
         this.historyStore.saveState(this.filters);
 
         // Reload rules to re-select all by default

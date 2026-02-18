@@ -90,6 +90,7 @@ export class IncidentStore {
         const end = filters.endDate.setHours(23, 59, 59, 999);
         const selectedRules = filters.selectedRules;
         const liveMode = filters.liveMode;
+        const searchTerm = filters.incidentSearchTerm.toLowerCase();
 
         console.log(`[Store] Before filtering, total incidents: ${this.incidents.length}`);
 
@@ -119,10 +120,29 @@ export class IncidentStore {
 
             // Check rule filter
             if (selectedRules && selectedRules.length > 0) {
-                return selectedRules.includes(incident.rule.name);
+                if (!selectedRules.includes(incident.rule.name)) {
+                    return false;
+                }
             }
 
-            return false;
+            // Check search term - search across all incident fields
+            if (searchTerm) {
+                const searchableText = [
+                    incident.id.toString(),
+                    incident.message,
+                    incident.rule.name,
+                    incident.severity,
+                    incident.startTime.toString(),
+                    incident.createdAt.toString(),
+                    incident.updatedAt?.toString() || ''
+                ].join(' ').toLowerCase();
+
+                if (!searchableText.includes(searchTerm)) {
+                    return false;
+                }
+            }
+
+            return true;
         }));
 
         console.log(`[Store] Filtered incidents count: ${this.filteredIncidents().length}`);
