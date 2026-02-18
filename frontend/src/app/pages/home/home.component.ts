@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ScatterComponent } from '../../components/scatter/scatter.component';
+import { AdaptativeChartComponent } from '../../components/adaptative-chart/adaptative-chart.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FilterSidebarComponent } from '../../components/filter-sidebar/filter-sidebar.component';
 import { FilterStore } from '../../stores/filter.store';
@@ -25,7 +25,7 @@ interface SelectedData {
 @Component({
     selector: 'app-home',
     standalone: true,
-    imports: [CommonModule, ScatterComponent, NavbarComponent, FilterSidebarComponent],
+    imports: [CommonModule, AdaptativeChartComponent, NavbarComponent, FilterSidebarComponent],
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })

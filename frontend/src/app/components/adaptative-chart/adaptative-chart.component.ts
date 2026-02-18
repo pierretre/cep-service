@@ -22,14 +22,14 @@ import { RelateHoverComponent, RelateHoverInfo } from '../relate-hover/relate-ho
 import { HamstersEvent } from '../../decorators/hamsters.decorator';
 
 @Component({
-    selector: 'app-scatter',
+    selector: 'app-adaptative-chart',
     standalone: true,
     imports: [CommonModule, IncidentDetailsComponent, RelateHoverComponent],
-    templateUrl: './scatter.component.html',
-    styleUrls: ['./scatter.component.css'],
+    templateUrl: './adaptative-chart.component.html',
+    styleUrls: ['./adaptative-chart.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScatterComponent implements OnDestroy, AfterViewInit {
+export class AdaptativeChartComponent implements OnDestroy, AfterViewInit {
 
     @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
 

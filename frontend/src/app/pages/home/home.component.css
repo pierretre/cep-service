@@ -8,7 +8,7 @@
 /* Chart containers */
 #overview-chart,
 #detail-chart,
-#scatter-chart {
+#adaptative-chart {
     min-height: 200px;
 }
 
@@ -46,9 +46,12 @@
 
 /* Highlight animation for selected items */
 @keyframes highlight-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.7;
     }
@@ -68,6 +71,7 @@
         transform: translateX(-100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -84,6 +88,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -110,8 +115,13 @@ button:not(:disabled):active {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive adjustments */
@@ -119,7 +129,7 @@ button:not(:disabled):active {
     .w-80 {
         width: 16rem;
     }
-    
+
     .w-96 {
         width: 20rem;
     }
@@ -137,7 +147,7 @@ input:focus {
     .bg-gray-50 {
         background-color: #ffffff;
     }
-    
+
     .border-gray-200 {
         border-color: #000000;
     }
@@ -157,10 +167,10 @@ input:focus {
     .no-print {
         display: none !important;
     }
-    
+
     #overview-chart,
     #detail-chart,
-    #scatter-chart {
+    #adaptative-chart {
         page-break-inside: avoid;
     }
 }
