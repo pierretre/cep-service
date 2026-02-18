@@ -45,8 +45,8 @@ export class FilterSidebarComponent implements OnInit {
             next: (rules) => {
                 this.availableRules = rules;
 
-                // If no rules are currently selected (null or empty), select all by default
-                if ((!this.filters.selectedRules || this.filters.selectedRules.length === 0) && rules.length > 0) {
+                // If no rules are currently selected, select all by default
+                if (this.filters.selectedRules.length === 0 && rules.length > 0) {
                     const allRuleNames = rules.map(rule => rule.name);
                     this.filterStore.updateFilters({ selectedRules: allRuleNames });
                     this.historyStore.saveState(this.filters);
@@ -158,7 +158,7 @@ export class FilterSidebarComponent implements OnInit {
     }
 
     isRuleSelected(ruleName: string): boolean {
-        return this.filters.selectedRules ? this.filters.selectedRules.includes(ruleName) : false;
+        return this.filters.selectedRules.includes(ruleName);
     }
 
     getFilteredRules(): Rule[] {
@@ -173,7 +173,7 @@ export class FilterSidebarComponent implements OnInit {
     }
 
     onRuleToggle(ruleName: string): void {
-        const currentRules = this.filters.selectedRules ? [...this.filters.selectedRules] : [];
+        const currentRules = [...this.filters.selectedRules];
         const index = currentRules.indexOf(ruleName);
 
         if (index >= 0) {

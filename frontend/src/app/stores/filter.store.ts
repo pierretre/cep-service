@@ -18,7 +18,7 @@ export class FilterStore {
             warning: true,
             info: true
         },
-        selectedRules: null,
+        selectedRules: [],
         incidentSearchTerm: ''
     });
 
@@ -58,7 +58,7 @@ export class FilterStore {
                 warning: true,
                 info: true,
             },
-            selectedRules: null,
+            selectedRules: [],
             incidentSearchTerm: ''
         });
     }

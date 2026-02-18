@@ -7,6 +7,6 @@ export interface FilterConfig {
         warning: boolean;
         info: boolean;
     };
-    selectedRules: string[] | null;
+    selectedRules: string[];
     incidentSearchTerm: string;
 }
