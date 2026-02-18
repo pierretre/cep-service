@@ -1,7 +1,6 @@
 import * as echarts from 'echarts';
 import {
     Component,
-    OnInit,
     OnDestroy,
     ElementRef,
     ViewChild,
@@ -20,6 +19,7 @@ import { FilterStore } from '../../stores/filter.store';
 import { Incident } from '../../models';
 import { IncidentDetailsComponent } from '../incident-details/incident-details.component';
 import { RelateHoverComponent, RelateHoverInfo } from '../relate-hover/relate-hover.component';
+import { HamstersEvent } from '../../decorators/hamsters.decorator';
 
 @Component({
     selector: 'app-scatter',
@@ -67,87 +67,14 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         this.updateChartData(this.incidentStore.filteredIncidents());
 
         // Click handling
-        this.chartInstance.on('click', (params: any) => {
-            if (!params || !params.data) return;
-
-            const incident = params.data.incident;
-            if (!incident) return;
-
-            this.selectedIncident = incident;
-            console.log('Selected incident:', incident);
-
-            // Highlight related incidents and show hover info
-            this.highlightRelatedIncidents(incident);
-        });
+        this.chartInstance.on('click', (params: any) => this.handleChartClick(params));
 
         // Track zoom changes
-        this.chartInstance.on('dataZoom', (params: any) => {
-            const option = this.chartInstance.getOption() as any;
-            if (option.dataZoom && option.dataZoom.length > 0) {
-                this.currentZoom = {
-                    start: option.dataZoom[0].start,
-                    end: option.dataZoom[0].end
-                };
-                console.log('Zoom changed:', this.currentZoom);
-            }
-        });
+        this.chartInstance.on('dataZoom', (params: any) => this.handleDataZoom(params));
 
         // Highlight related incidents on hover (optimized with throttling)
-        this.chartInstance.on('mouseover', (params: any) => {
-            if (!params || !params.data || !params.data.incident) return;
-
-            // Throttle to prevent excessive updates
-            if (this.hoverThrottleTimer) return;
-
-            this.hoverThrottleTimer = setTimeout(() => {
-                this.hoverThrottleTimer = null;
-            }, 50); // 50ms throttle
-
-            const hoveredIncident = params.data.incident;
-            const severity = hoveredIncident.severity;
-            const cacheKey = `${hoveredIncident.rule.id}-${severity}`;
-
-            // Use cached indices if available
-            let relatedIndices = this.cachedRelatedIndices.get(cacheKey);
-            if (!relatedIndices) {
-                relatedIndices = this.getRelatedIncidentIndices(hoveredIncident);
-                this.cachedRelatedIndices.set(cacheKey, relatedIndices);
-            }
-
-            // Run inside Angular zone to update UI
-            this.ngZone.run(() => {
-                this.hoverInfo = {
-                    count: relatedIndices!.length,
-                    ruleName: hoveredIncident.rule.name,
-                    severity: severity
-                };
-                this.cdr.markForCheck();
-            });
-
-            // Highlight all incidents with same rule and severity
-            this.chartInstance.dispatchAction({
-                type: 'highlight',
-                seriesName: severity,
-                dataIndex: relatedIndices
-            });
-        });
-
-        this.chartInstance.on('mouseout', (params: any) => {
-            // Don't clear if an incident is selected
-            if (this.selectedIncident) return;
-
-            // Run inside Angular zone to update UI
-            this.ngZone.run(() => {
-                this.hoverInfo = null;
-                this.cdr.markForCheck();
-            });
-
-            // Clear all highlights
-            this.chartInstance.dispatchAction({
-                type: 'downplay',
-                seriesIndex: [0, 1, 2]
-            });
-        });
+        this.chartInstance.on('mouseover', (params: any) => this.handleChartMouseOver(params));
+        this.chartInstance.on('mouseout', () => this.handleChartMouseOut());
     }
 
     ngOnDestroy(): void {
@@ -330,6 +257,8 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         return indices;
     }
 
+    @HamstersEvent('User points at reference incident to relate to')
+    // @HamstersEvent('User holds activates Relation mode')
     private highlightRelatedIncidents(incident: Incident): void {
         const severity = incident.severity;
         const cacheKey = `${incident.rule.id}-${severity}`;
@@ -356,5 +285,94 @@ export class ScatterComponent implements OnDestroy, AfterViewInit {
         });
 
         this.cdr.markForCheck();
+    }
+
+    @HamstersEvent('User selects incident')
+    private handleChartClick(params: any): void {
+        if (!params?.data?.incident) {
+            return;
+        }
+
+        const incident = params.data.incident as Incident;
+        this.selectedIncident = incident;
+        console.log('Selected incident:', incident);
+        this.highlightRelatedIncidents(incident);
+    }
+
+
+    // @HamstersEvent('User selects an area')
+    @HamstersEvent('User drags zoom bar on axis')
+    private handleDataZoom(params: any): void {
+        const option = this.chartInstance.getOption() as any;
+        if (option.dataZoom && option.dataZoom.length > 0) {
+            this.currentZoom = {
+                start: option.dataZoom[0].start,
+                end: option.dataZoom[0].end
+            };
+            console.log('Zoom changed:', this.currentZoom);
+        }
+    }
+
+    @HamstersEvent('User hovers data points')
+    private handleChartMouseOver(params: any): void {
+        if (!params?.data?.incident) {
+            return;
+        }
+
+        // Throttle to prevent excessive updates
+        if (this.hoverThrottleTimer) {
+            return;
+        }
+
+        this.hoverThrottleTimer = setTimeout(() => {
+            this.hoverThrottleTimer = null;
+        }, 50); // 50ms throttle
+
+        const hoveredIncident = params.data.incident as Incident;
+        const severity = hoveredIncident.severity;
+        const cacheKey = `${hoveredIncident.rule.id}-${severity}`;
+
+        // Use cached indices if available
+        let relatedIndices = this.cachedRelatedIndices.get(cacheKey);
+        if (!relatedIndices) {
+            relatedIndices = this.getRelatedIncidentIndices(hoveredIncident);
+            this.cachedRelatedIndices.set(cacheKey, relatedIndices);
+        }
+
+        // Run inside Angular zone to update UI
+        this.ngZone.run(() => {
+            this.hoverInfo = {
+                count: relatedIndices!.length,
+                ruleName: hoveredIncident.rule.name,
+                severity: severity
+            };
+            this.cdr.markForCheck();
+        });
+
+        // Highlight all incidents with same rule and severity
+        this.chartInstance.dispatchAction({
+            type: 'highlight',
+            seriesName: severity,
+            dataIndex: relatedIndices
+        });
+    }
+
+    private handleChartMouseOut(): void {
+        // Don't clear if an incident is selected
+        if (this.selectedIncident) {
+            return;
+        }
+
+        // Run inside Angular zone to update UI
+        this.ngZone.run(() => {
+            this.hoverInfo = null;
+            this.cdr.markForCheck();
+        });
+
+        // Clear all highlights
+        this.chartInstance.dispatchAction({
+            type: 'downplay',
+            seriesIndex: [0, 1, 2]
+        });
     }
 }

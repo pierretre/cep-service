@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FilterHistoryControlsComponent } from '../filter-history-controls/filter-history-controls.component';
@@ -7,6 +7,7 @@ import { FilterStore } from '../../stores/filter.store';
 import { FilterConfig } from '../../models/filter-config.model';
 import { RuleService } from '../../services/rule.service';
 import { Rule } from '../../models/rule.model';
+import { HamstersEvent } from '../../decorators/hamsters.decorator';
 
 @Component({
     selector: 'app-filter-sidebar',
@@ -190,6 +191,11 @@ export class FilterSidebarComponent implements OnInit {
         if (nextState) {
             this.filterStore.updateFilters(nextState);
         }
+    }
+
+    @HamstersEvent('Set incident Severity')
+    onSeverityChange(): void {
+        this.onFilterChange();
     }
 
     onFilterChange(): void {

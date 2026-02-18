@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScatterComponent } from '../../components/scatter/scatter.component';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -29,13 +29,16 @@ interface SelectedData {
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
     selectedData = signal<SelectedData | null>(null);
 
     constructor(
         protected filterStore: FilterStore,
         private incidentStore: IncidentStore
     ) { }
+
+    @HamstersEvent('User accesses the overview')
+    ngOnInit(): void { }
 
     @HamstersEvent('exportData')
     exportData(): void {

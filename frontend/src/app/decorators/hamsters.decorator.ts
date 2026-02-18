@@ -20,8 +20,7 @@ export function HamstersEvent(
                 event: eventName,
                 nodeId,
                 method: propertyKey,
-                timestamp: Date.now(),
-                args
+                timestamp: Date.now()
             });
 
             return originalMethod.apply(this, args);
