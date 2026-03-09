@@ -96,9 +96,6 @@ public class EsperCepEngineImpl implements CepEngine {
 
         statement.addListener((newEvents, oldEvents, stmt, rt) -> {
             for (com.espertech.esper.common.client.EventBean event : newEvents) {
-                System.out.println("[" + rule.getName() + "] MATCH: " + formatEvent(event));
-
-                // Create and save incident to database
                 createIncident(rule, event);
             }
         });
@@ -213,12 +210,14 @@ public class EsperCepEngineImpl implements CepEngine {
             // Evict cache since new incident was created
             incidentService.evictCache();
 
-            log.info("Incident created with ID: {} for rule: {}", savedIncident.getId(), deployedRule.getName());
+            // log.info("Incident created with ID: {} for rule: {}", savedIncident.getId(),
+            // deployedRule.getName());
 
             // Broadcast incident via SSE
             IncidentResponse incidentResponse = IncidentResponse.fromIncident(savedIncident);
             incidentSseService.broadcastIncident(incidentResponse);
-            log.debug("Incident broadcasted to {} SSE clients", incidentSseService.getActiveConnectionCount());
+            // log.debug("Incident broadcasted to {} SSE clients",
+            // incidentSseService.getActiveConnectionCount());
 
         } catch (Exception e) {
             log.error("Failed to create incident for rule: {}", deployedRule.getName(), e);

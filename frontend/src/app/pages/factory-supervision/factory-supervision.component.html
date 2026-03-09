@@ -1,0 +1,13 @@
+<app-navbar [title]="'Factory Supervision'" [showExportButton]="false" [showRoleToggle]="true"
+    [selectedRole]="selectedRole()" (roleChange)="onRoleChange($event)">
+</app-navbar>
+
+<main class="factory-page">
+    <app-factory-shopfloor-layout class="shopfloor-full"></app-factory-shopfloor-layout>
+
+    <ng-container *ngIf="currentReplanningIncident() as activeIncident">
+        <app-replanning-incident-popup *ngIf="isOperationalEngineer()" [incident]="activeIncident"
+            (validateCorrection)="onValidateCorrection($event)">
+        </app-replanning-incident-popup>
+    </ng-container>
+</main>

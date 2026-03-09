@@ -1,0 +1,21 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.shopfloor-layout {
+    height: 100%;
+    background: #ffffff;
+}
+
+.shopfloor-canvas {
+    height: 100%;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.shopfloor-canvas svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}

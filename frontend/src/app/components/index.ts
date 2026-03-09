@@ -3,3 +3,4 @@ export { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.componen
 export { FilterHistoryControlsComponent } from './filter-history-controls/filter-history-controls.component';
 export { IncidentDetailsComponent } from './incident-details/incident-details.component';
 export { RelateHoverComponent } from './relate-hover/relate-hover.component';
+export { FactoryShopfloorLayoutComponent } from './factory-shopfloor-layout/factory-shopfloor-layout.component';

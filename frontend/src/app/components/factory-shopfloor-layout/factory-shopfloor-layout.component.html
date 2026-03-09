@@ -1,0 +1,483 @@
+<section class="shopfloor-layout" aria-label="Factory shopfloor top view">
+    <div class="shopfloor-canvas" role="img" aria-label="Factory top-view machine layout">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1500"
+            height="1500" viewBox="0 0 1500 1500">
+            <style>
+                .accessZone {
+                    fill: lightblue;
+                    fill-opacity: 0.5;
+                }
+
+                .woodBase {
+                    fill: burlywood;
+                    stroke: black;
+                }
+
+                .plasticBase {
+                    fill: darkgray;
+                    fill-opacity: 0.5;
+                    stroke: black;
+                }
+
+                .conveyorZone {
+                    fill: dimgray;
+                }
+
+                .lightBarrier {
+                    fill: yellow;
+                    fill-opacity: 0.5;
+                    stroke: black;
+                }
+
+                .colorLightBarrier {
+                    fill: red;
+                    fill-opacity: 0.3;
+                    stroke: black;
+                }
+
+                .electronicCard {
+                    fill: green;
+                    stroke: black;
+                }
+
+                .slider {
+                    fill: dimgray;
+                    stroke: black;
+                }
+
+                .ejector {
+                    fill: lightgray;
+                    stroke: black;
+                }
+
+                .storage {
+                    fill: lightgray;
+                    stroke: black;
+                }
+            </style>
+            <defs>
+                <pattern x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse" id="beltPattern_CBSystemModel"
+                    patternTransform="translate(0,0)">
+                    <rect width="24" height="24" fill="#4c4c4c">
+                    </rect>
+                    <rect width="10" height="24" x="0" y="0" fill="#6e6e6e">
+                    </rect>
+                    <rect width="4" height="24" x="14" y="0" fill="#838383">
+                    </rect>
+                </pattern>
+                <mask id="SvgjsMask1000">
+                    <rect width="128" height="320" fill="white" x="110" y="56">
+                    </rect>
+                    <circle r="40" cx="174" cy="120" fill="black">
+                    </circle>
+                    <rect width="64" height="64" x="110" y="56">
+                    </rect>
+                </mask>
+                <mask id="SvgjsMask1001">
+                    <rect width="630" height="1575" fill="white" x="-101" y="-210">
+                    </rect>
+                    <circle r="165" cx="214" cy="105" fill="black">
+                    </circle>
+                    <polygon points="214,105 529,105 529,420" fill="black">
+                    </polygon>
+                </mask>
+                <mask id="SvgjsMask1002">
+                    <rect width="630" height="1575" fill="white" x="-101" y="-210">
+                    </rect>
+                    <circle r="165" cx="214" cy="105" fill="black">
+                    </circle>
+                    <polygon points="214,105 529,105 529,420" fill="black">
+                    </polygon>
+                </mask>
+            </defs>
+            <g id="rulers">
+                <line x1="0" y1="0" x2="1500" y2="0" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="0" x2="0" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="100" y1="0" x2="100" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="200" y1="0" x2="200" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="300" y1="0" x2="300" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="400" y1="0" x2="400" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="500" y1="0" x2="500" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="600" y1="0" x2="600" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="700" y1="0" x2="700" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="800" y1="0" x2="800" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="900" y1="0" x2="900" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="1000" y1="0" x2="1000" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="1100" y1="0" x2="1100" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="1200" y1="0" x2="1200" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="1300" y1="0" x2="1300" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="1400" y1="0" x2="1400" y2="10" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="0" x2="0" y2="1500" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="0" x2="10" y2="0" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="100" x2="10" y2="100" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="200" x2="10" y2="200" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="300" x2="10" y2="300" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="400" x2="10" y2="400" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="500" x2="10" y2="500" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="600" x2="10" y2="600" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="700" x2="10" y2="700" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="800" x2="10" y2="800" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="900" x2="10" y2="900" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="1000" x2="10" y2="1000" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="1100" x2="10" y2="1100" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="1200" x2="10" y2="1200" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="1300" x2="10" y2="1300" stroke-width="1" stroke="black">
+                </line>
+                <line x1="0" y1="1400" x2="10" y2="1400" stroke-width="1" stroke="black">
+                </line>
+            </g>
+            <g id="CBSystemModel" transform="matrix(-1,1.2246467991473532e-16,-1.2246467991473532e-16,-1,730,1010)">
+                <g id="woodBase_CBSystemModel">
+                    <rect width="260" height="186" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="referencePoint_CBSystemModel">
+                    </rect>
+                </g>
+                <g id="plasticBase_CBSystemModel">
+                    <rect width="257" height="186" x="0" y="0" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="electronicCard_CBSystemModel">
+                    <rect width="108" height="80" x="75" y="100" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="conveyorZone_CBSystemModel">
+                    <rect width="270" height="50" id="beltSurface_CBSystemModel" class="conveyorZone"
+                        fill="url(#beltPattern_CBSystemModel)" x="0" y="5">
+                    </rect>
+                    <g id="conveyorDirection_CBSystemModel" transform="rotate(0 135 30)">
+                        <polygon points="121,18 149,30 121,42" fill="#1f2937" stroke-width="1.5" stroke="#111827">
+                        </polygon>
+                    </g>
+                </g>
+                <g id="sensorsGroup_CBSystemModel">
+                    <rect width="20" height="80" id="sensorFeed_CBSystemModel" x="30" y="-10"
+                        class="lightBarrier sensorInactive">
+                    </rect>
+                    <rect width="20" height="80" id="sensorSwap_CBSystemModel" x="220" y="-10"
+                        class="lightBarrier sensorInactive">
+                    </rect>
+                    <rect width="20" height="80" id="sensorImpulse_CBSystemModel" x="125" y="-10"
+                        class="lightBarrier sensorInactive">
+                    </rect>
+                </g>
+                <rect width="18" height="24" id="conveyorProduct_CBSystemModel" x="35" y="18" class="conveyorProduct"
+                    fill="#f59e0b" stroke-width="1" stroke="#92400e">
+                </rect>
+                <circle r="7" cx="240" cy="169" id="executionIndicator_CBSystemModel" class="executionIndicator"
+                    fill="red" stroke-width="1.25" stroke="#111827">
+                </circle>
+            </g>
+            <g id="HBWSystemModel" transform="matrix(1,0,0,1,460,150)">
+                <g id="woodBase_HBWSystemModel">
+                    <rect width="690" height="440" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="referencePoint_HBWSystemModel">
+                    </rect>
+                </g>
+                <g id="plasticBase_HBWSystemModel">
+                    <rect width="576" height="258" x="57" y="84" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="conveyorZone_HBWSystemModel">
+                    <rect width="31" height="132" class="conveyorZone" x="144" y="215">
+                    </rect>
+                </g>
+                <g id="electronicCard_HBWSystemModel">
+                    <rect width="86" height="126" x="546" y="215" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="storage_HBWSystemModel">
+                    <rect width="30" height="30" x="262" y="218" class="storage">
+                    </rect>
+                    <rect width="30" height="30" x="352" y="218" class="storage">
+                    </rect>
+                    <rect width="30" height="30" x="442" y="218" class="storage">
+                    </rect>
+                </g>
+                <g>
+                    <rect width="72" height="15" x="125" y="325" class="lightBarrier">
+                    </rect>
+                    <rect width="72" height="15" x="125" y="222" class="lightBarrier">
+                    </rect>
+                </g>
+                <g id="ArmArmAccessZone_HBWSystemModel">
+                    <rect width="340" height="70" x="144" y="175" class="accessZone">
+                    </rect>
+                </g>
+            </g>
+            <g id="SLSystemModel" transform="matrix(-1.8369701987210297e-16,-1,1,-1.8369701987210297e-16,150,1350)">
+                <g id="woodBase_SLSystemModel">
+                    <rect width="440" height="310" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="referencePoint_SLSystemModel">
+                    </rect>
+                </g>
+                <g id="plasticBase_SLSystemModel">
+                    <rect width="380" height="258" x="0" y="12" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="conveyorZone_SLSystemModel">
+                    <rect width="400" height="30" class="conveyorZone" x="-10" y="105">
+                    </rect>
+                </g>
+                <g id="slider_SLSystemModel">
+                    <rect width="30" height="86" x="210" y="135" class="slider">
+                    </rect>
+                    <rect width="30" height="86" x="270" y="135" class="slider">
+                    </rect>
+                    <rect width="30" height="86" x="333" y="135" class="slider">
+                    </rect>
+                </g>
+                <g id="electronicCard_SLSystemModel">
+                    <rect width="126" height="86" x="30" y="180" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="slider_SLSystemModel">
+                    <rect width="15" height="93" x="220" y="12" class="ejector">
+                    </rect>
+                    <rect width="15" height="93" x="280" y="12" class="ejector">
+                    </rect>
+                    <rect width="15" height="93" x="338" y="12" class="ejector">
+                    </rect>
+                </g>
+                <g id="sensorsGroup_SLSystemModel">
+                    <rect width="15" height="72" id="sortingLineSensInputLightBarrier_SLSystemModel" x="10" y="85"
+                        class="lightBarrier sensorInactive" sortingLineSensInputLightBarrier="0"
+                        data-param="sortingLineSensInputLightBarrier">
+                    </rect>
+                    <rect width="15" height="72" id="sortingLineSensMiddleLightBarrier_SLSystemModel" x="195" y="85"
+                        class="lightBarrier sensorInactive" sortingLineSensMiddleLightBarrier="0"
+                        data-param="sortingLineSensMiddleLightBarrier">
+                    </rect>
+                    <rect width="68" height="15" id="sortingLineSensWhiteLightBarrier_SLSystemModel" x="193" y="200"
+                        class="lightBarrier sensorInactive" sortingLineSensWhiteLightBarrier="0"
+                        data-param="sortingLineSensWhiteLightBarrier">
+                    </rect>
+                    <rect width="68" height="15" id="sortingLineSensBlueLightBarrier_SLSystemModel" x="252" y="185"
+                        class="lightBarrier sensorInactive" sortingLineSensBlueLightBarrier="0"
+                        data-param="sortingLineSensBlueLightBarrier">
+                    </rect>
+                    <rect width="68" height="15" id="sortingLineSensRedLightBarrier_SLSystemModel" x="315" y="200"
+                        class="lightBarrier sensorInactive" sortingLineSensRedLightBarrier="0"
+                        data-param="sortingLineSensRedLightBarrier">
+                    </rect>
+                    <rect width="110" height="60" x="48" y="90" class="colorLightBarrier">
+                    </rect>
+                </g>
+                <g id="sortingLineImpulseCounter_SLSystemModel">
+                    <rect width="60" height="18" x="360" y="88" fill="#ffffff" stroke-width="1" stroke="#6b7280"
+                        class="impulseCounterBackground">
+                    </rect>
+                    <text id="sortingLineSensImpulseCounterRaw_SLSystemModel" x="368" y="106.1015625" font-size="12"
+                        font-family="monospace" text-anchor="start" fill="#111827" sortingLineSensImpulseCounterRaw="0"
+                        data-param="sortingLineSensImpulseCounterRaw">
+                        <tspan dy="0" x="368">0</tspan>
+                    </text>
+                </g>
+            </g>
+            <g id="MPSystemModel" transform="matrix(6.123233995736766e-17,1,-1,6.123233995736766e-17,460,470)">
+                <g id="woodBase_MPSystemModel">
+                    <rect width="438" height="310" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="referencePoint_MPSystemModel">
+                    </rect>
+                </g>
+                <g id="plasticBase_MPSystemModel">
+                    <rect width="410" height="258" x="25" y="25" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="conveyorZone_MPSystemModel">
+                    <rect width="31" height="132" class="conveyorZone" x="46" y="20">
+                    </rect>
+                </g>
+                <g id="slider_MPSystemModel">
+                    <rect width="60" height="30" x="46" y="105" class="slider">
+                    </rect>
+                </g>
+                <g id="electronicCard_MPSystemModel">
+                    <rect width="126" height="86" x="160" y="196" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="electronicCard_MPSystemModel">
+                    <rect width="180" height="106" x="252" y="86" fill="None" stroke="black">
+                    </rect>
+                    <rect width="90" height="30" x="322" y="86" fill="None" stroke="black">
+                    </rect>
+                </g>
+                <g>
+                    <rect width="120" height="15" x="300" y="58" class="lightBarrier">
+                    </rect>
+                    <rect width="96" height="15" x="10" y="42" class="lightBarrier">
+                    </rect>
+                </g>
+                <g id="ArmArmAccessZone_MPSystemModel">
+                    <rect width="260" height="15" x="156" y="60" class="accessZone">
+                    </rect>
+                </g>
+                <g id="turntableAccessZone_MPSystemModel">
+                    <circle r="64" cx="174" cy="120" class="accessZone" mask="url(#SvgjsMask1000)">
+                    </circle>
+                </g>
+                <g id="turntableAxis_MPSystemModel">
+                    <circle r="5" cx="5" cy="5" transform="matrix(1,0,0,1,169,115)" stroke="black" fill="none">
+                    </circle>
+                    <line x1="169" y1="125" x2="179" y2="115" stroke-width="1" stroke="black">
+                    </line>
+                    <line x1="169" y1="115" x2="179" y2="125" stroke-width="1" stroke="black">
+                    </line>
+                </g>
+                <g id="ArmArmAccessZone_MPSystemModel">
+                    <rect width="30" height="90" x="348" y="50" class="accessZone">
+                    </rect>
+                </g>
+                <g id="saw_MPSystemModel">
+                    <polygon
+                        points="156,165 156,165 160.3388373911756,170.99031132097582 167.72747223702044,170.647652972119 165.74927912181823,177.77479066043685 170.62391868272735,183.33781400934473 163.8183148246803,186.23489801858733 162.50825608676337,193.5145330185363 156,190 149.49174391323663,193.5145330185363 148.1816851753197,186.23489801858733 141.37608131727265,183.33781400934473 146.25072087818177,177.77479066043685 144.27252776297956,170.647652972119 151.6611626088244,170.99031132097582 156,165"
+                        stroke="black" fill="none">
+                    </polygon>
+                </g>
+            </g>
+            <g id="VGRSystemModel_01" transform="matrix(-1,1.2246467991473532e-16,-1.2246467991473532e-16,-1,750,810)">
+                <g id="vgrWoodBase_VGRSystemModel_01">
+                    <rect width="257" height="186" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="vgrReferencePoint_VGRSystemModel_01">
+                    </rect>
+                </g>
+                <g id="vgrPlasticBase_VGRSystemModel_01">
+                    <rect width="257" height="186" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="electronicCard_VGRSystemModel_01">
+                    <rect width="86" height="126" x="0" y="60" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="vgrRotationAxis_VGRSystemModel_01">
+                    <circle r="5" cx="5" cy="5" transform="matrix(1,0,0,1,209,100)" stroke="black" fill="none">
+                    </circle>
+                    <line x1="209" y1="110" x2="219" y2="100" stroke-width="1" stroke="black">
+                    </line>
+                    <line x1="209" y1="100" x2="219" y2="110" stroke-width="1" stroke="black">
+                    </line>
+                </g>
+                <g id="vgrArmAccessZone_VGRSystemModel_01">
+                    <circle r="315" cx="214" cy="105" class="accessZone" mask="url(#SvgjsMask1001)">
+                    </circle>
+                </g>
+                <g id="vgrDynamicInputs_VGRSystemModel_01">
+                    <g id="vacuumSensRotEncoderCounter_VGRSystemModel_01" transform="rotate(0 214 105)"
+                        vacuumSensRotEncoderCounter="0" data-param="vacuumSensRotEncoderCounter">
+                        <polygon points="214,109 300,105 300,113" fill="#0f766e" stroke-width="1" stroke="#134e4a">
+                        </polygon>
+                    </g>
+                    <circle r="5" cx="299" cy="105" id="vacuumSensArmEncoderCounter_VGRSystemModel_01" fill="#f59e0b"
+                        stroke-width="1" stroke="#92400e" vacuumSensArmEncoderCounter="0"
+                        data-param="vacuumSensArmEncoderCounter">
+                    </circle>
+                    <rect width="12" height="20" id="vacuumSensVerticalEncoderCounter_VGRSystemModel_01" x="208" y="-15"
+                        fill="#2563eb" stroke-width="1" stroke="#1d4ed8" vacuumSensVerticalEncoderCounter="0"
+                        data-param="vacuumSensVerticalEncoderCounter">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensVerticalEndUp_VGRSystemModel_01" x="28" y="14"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569"
+                        vacuumSensVerticalEndUp="0" data-param="vacuumSensVerticalEndUp">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensRotEnd_VGRSystemModel_01" x="228" y="14"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569" vacuumSensRotEnd="0"
+                        data-param="vacuumSensRotEnd">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensArmEndIn_VGRSystemModel_01" x="214" y="166"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569" vacuumSensArmEndIn="0"
+                        data-param="vacuumSensArmEndIn">
+                    </rect>
+                </g>
+            </g>
+            <g id="VGRSystemModel_02" transform="matrix(6.123233995736766e-17,1,-1,6.123233995736766e-17,660,1020)">
+                <g id="vgrWoodBase_VGRSystemModel_02">
+                    <rect width="257" height="186" class="woodBase">
+                    </rect>
+                    <rect width="5" height="5" fill="red" id="vgrReferencePoint_VGRSystemModel_02">
+                    </rect>
+                </g>
+                <g id="vgrPlasticBase_VGRSystemModel_02">
+                    <rect width="257" height="186" class="plasticBase">
+                    </rect>
+                </g>
+                <g id="electronicCard_VGRSystemModel_02">
+                    <rect width="86" height="126" x="0" y="60" class="electronicCard">
+                    </rect>
+                </g>
+                <g id="vgrRotationAxis_VGRSystemModel_02">
+                    <circle r="5" cx="5" cy="5" transform="matrix(1,0,0,1,209,100)" stroke="black" fill="none">
+                    </circle>
+                    <line x1="209" y1="110" x2="219" y2="100" stroke-width="1" stroke="black">
+                    </line>
+                    <line x1="209" y1="100" x2="219" y2="110" stroke-width="1" stroke="black">
+                    </line>
+                </g>
+                <g id="vgrArmAccessZone_VGRSystemModel_02">
+                    <circle r="315" cx="214" cy="105" class="accessZone" mask="url(#SvgjsMask1002)">
+                    </circle>
+                </g>
+                <g id="vgrDynamicInputs_VGRSystemModel_02">
+                    <g id="vacuumSensRotEncoderCounter_VGRSystemModel_02" transform="rotate(0 214 105)"
+                        vacuumSensRotEncoderCounter="0" data-param="vacuumSensRotEncoderCounter">
+                        <polygon points="214,109 300,105 300,113" fill="#0f766e" stroke-width="1" stroke="#134e4a">
+                        </polygon>
+                    </g>
+                    <circle r="5" cx="299" cy="105" id="vacuumSensArmEncoderCounter_VGRSystemModel_02" fill="#f59e0b"
+                        stroke-width="1" stroke="#92400e" vacuumSensArmEncoderCounter="0"
+                        data-param="vacuumSensArmEncoderCounter">
+                    </circle>
+                    <rect width="12" height="20" id="vacuumSensVerticalEncoderCounter_VGRSystemModel_02" x="208" y="-15"
+                        fill="#2563eb" stroke-width="1" stroke="#1d4ed8" vacuumSensVerticalEncoderCounter="0"
+                        data-param="vacuumSensVerticalEncoderCounter">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensVerticalEndUp_VGRSystemModel_02" x="28" y="14"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569"
+                        vacuumSensVerticalEndUp="0" data-param="vacuumSensVerticalEndUp">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensRotEnd_VGRSystemModel_02" x="228" y="14"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569" vacuumSensRotEnd="0"
+                        data-param="vacuumSensRotEnd">
+                    </rect>
+                    <rect width="20" height="10" id="vacuumSensArmEndIn_VGRSystemModel_02" x="214" y="166"
+                        class="sensorInactive" fill="#94a3b8" stroke-width="1" stroke="#475569" vacuumSensArmEndIn="0"
+                        data-param="vacuumSensArmEndIn">
+                    </rect>
+                </g>
+            </g>
+        </svg>
+    </div>
+</section>

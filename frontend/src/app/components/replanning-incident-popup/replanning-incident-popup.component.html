@@ -1,0 +1,21 @@
+<aside class="replanning-popup" role="dialog" aria-label="Live replanning incident">
+    <div class="popup-header">
+        <p class="alert-badge">Live Replanning Incident</p>
+        <h3 class="popup-title">{{ incident.message }}</h3>
+    </div>
+
+    <div class="popup-body">
+        <div class="detail-card">
+            <h4>Required Action</h4>
+            <p>{{ incident.requiredAction }}</p>
+        </div>
+
+        <label class="comment-label" for="replanningComment">Correction Comment</label>
+        <textarea id="replanningComment" [(ngModel)]="comment"
+            placeholder="Describe the corrective action performed on the line..."></textarea>
+
+        <button type="button" (click)="onValidateCorrection()" [disabled]="!comment.trim()" class="validate-button">
+            Validate Correction
+        </button>
+    </div>
+</aside>

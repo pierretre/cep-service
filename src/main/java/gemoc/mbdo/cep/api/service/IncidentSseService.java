@@ -57,7 +57,8 @@ public class IncidentSseService {
     public void broadcastIncident(IncidentResponse incident) {
         List<SseEmitter> deadEmitters = new CopyOnWriteArrayList<>();
 
-        log.info("Broadcasting incident {} to {} clients", incident.getId(), emitters.size());
+        // log.info("Broadcasting incident {} to {} clients", incident.getId(),
+        // emitters.size());
 
         for (SseEmitter emitter : emitters) {
             try {
