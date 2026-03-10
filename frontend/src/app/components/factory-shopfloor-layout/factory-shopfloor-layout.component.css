@@ -3,19 +3,55 @@
     height: 100%;
 }
 
-.shopfloor-layout {
+.shopfloor-container {
     height: 100%;
     background: #ffffff;
-}
-
-.shopfloor-canvas {
-    height: 100%;
-    background-color: #ffffff;
     overflow: hidden;
 }
 
-.shopfloor-canvas svg {
-    display: block;
+.shopfloor-container svg {
     width: 100%;
     height: 100%;
+}
+
+.shopfloor-container .lightBarrier.active {
+    fill: #22c55e;
+    fill-opacity: 0.75;
+}
+
+.shopfloor-container .storage.active {
+    fill: #93c5fd;
+}
+
+.shopfloor-container .conveyorZone.forward {
+    animation: belt-forward 0.8s linear infinite;
+}
+
+.shopfloor-container .conveyorZone.backward {
+    animation: belt-backward 0.8s linear infinite;
+}
+
+.shopfloor-container #sawMPSystemModel polygon.active {
+    stroke: #dc2626;
+    stroke-width: 2;
+}
+
+@keyframes belt-forward {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(8px);
+    }
+}
+
+@keyframes belt-backward {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-8px);
+    }
 }

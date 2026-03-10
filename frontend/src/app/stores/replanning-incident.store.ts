@@ -13,12 +13,7 @@ export class ReplanningIncidentStore {
     readonly history = this.historyState.asReadonly();
     readonly currentIncident = this.currentIncidentState.asReadonly();
 
-    constructor() {
-        // Simulate a live incident arriving a few seconds after the page opens.
-        setTimeout(() => {
-            this.currentIncidentState.set(this.buildMockLiveIncident());
-        }, 3500);
-    }
+    constructor() { }
 
     resolveCurrentIncident(comment: string): void {
         const currentIncident = this.currentIncidentState();
