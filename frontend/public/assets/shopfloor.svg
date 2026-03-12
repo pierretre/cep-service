@@ -1,7 +1,9 @@
 <svg id="shopfloor-svg" xmlns="http://www.w3.org/2000/svg" version="1.1"
     xmlns:xlink="http://www.w3.org/1999/xlink" width="1500" height="1500" viewBox="0 0 1500 1500">
     <style>
-        .accessZone{fill:lightblue;fill-opacity:0.5;}.woodBase{fill:red;stroke:black;}.plasticBase{fill:darkgray;fill-opacity:0.5;stroke:black;}.conveyorZone{fill:dimgray;}.lightBarrier{fill:yellow;fill-opacity:0.5;stroke:black;}.colorLightBarrier{fill:red;fill-opacity:0.3;stroke:black;}.electronicCard{fill:green;stroke:black;}.slider{fill:dimgray;stroke:black;}.ejector{fill:lightgray;stroke:black;}.storage{fill:lightgray;stroke:black;}</style>
+        .accessZone{fill:lightblue;fill-opacity:0.5;}.woodBase{fill:gray;stroke:black;}.plasticBase{fill:darkgray;fill-opacity:0.5;stroke:black;}.conveyorZone{fill:dimgray;}.lightBarrier{fill:yellow;fill-opacity:0.5;stroke:black;}.colorLightBarrier{fill:red;fill-opacity:0.3;stroke:black;}.electronicCard{fill:green;stroke:black;}.slider{fill:dimgray;stroke:black;}.ejector{fill:lightgray;stroke:black;}.storage{fill:lightgray;stroke:black;}.movingPart{transition:fill
+        150ms ease,stroke 150ms ease;}.movingPartNotOperational{fill:#dc2626
+        !important;stroke:#7f1d1d !important;}</style>
     <defs>
         <pattern x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse"
             id="beltPatternCBSystemModel" patternTransform="translate(0,0)">
@@ -120,37 +122,22 @@
             </rect>
         </g>
         <g id="conveyorZoneCBSystemModel">
-            <rect width="270" height="50" id="beltSurfaceCBSystemModel" class="conveyorZone"
-                data-role="beltSurface"
+            <rect width="270" height="50" id="beltSurfaceCBSystemModel"
+                class="conveyorZone movingPart"
                 fill="url(#beltPatternCBSystemModel)" x="0" y="5">
             </rect>
-            <g id="conveyorDirectionCBSystemModel" transform="rotate(0 135 30)">
-                <polygon points="121,18 149,30 121,42" fill="#1f2937" stroke-width="1.5"
-                    stroke="#111827">
-                </polygon>
-            </g>
         </g>
         <g id="sensorsGroupCBSystemModel">
             <rect width="20" height="80" id="sensorFeedCBSystemModel" x="30" y="-10"
-                data-sensor="sensorFeed"
                 class="lightBarrier sensorInactive">
             </rect>
             <rect width="20" height="80" id="sensorSwapCBSystemModel" x="220" y="-10"
-                data-sensor="sensorSwap"
                 class="lightBarrier sensorInactive">
             </rect>
             <rect width="20" height="80" id="sensorImpulseCBSystemModel" x="125" y="-10"
-                data-sensor="sensorImpulse"
                 class="lightBarrier sensorInactive">
             </rect>
         </g>
-        <rect width="18" height="24" id="conveyorProductCBSystemModel" x="35" y="18"
-            data-role="productMarker"
-            class="conveyorProduct" fill="#f59e0b" stroke-width="1" stroke="#92400e">
-        </rect>
-        <circle r="7" cx="240" cy="169" id="executionIndicatorCBSystemModel"
-            class="executionIndicator" fill="red" stroke-width="1.25" stroke="#111827">
-        </circle>
     </g>
     <g id="HBWSystemModel" transform="matrix(1,0,0,1,460,150)">
         <g id="woodBaseHBWSystemModel">
@@ -228,37 +215,22 @@
         </g>
         <g id="sensorsGroupSLSystemModel">
             <rect width="15" height="72" id="sortingLineSensInputLightBarrierSLSystemModel" x="10"
-                y="85" class="lightBarrier sensorInactive" sortingLineSensInputLightBarrier="0"
-                data-param="sortingLineSensInputLightBarrier">
+                y="85" class="lightBarrier sensorInactive" sortingLineSensInputLightBarrier="0">
             </rect>
             <rect width="15" height="72" id="sortingLineSensMiddleLightBarrierSLSystemModel" x="195"
-                y="85" class="lightBarrier sensorInactive" sortingLineSensMiddleLightBarrier="0"
-                data-param="sortingLineSensMiddleLightBarrier">
+                y="85" class="lightBarrier sensorInactive" sortingLineSensMiddleLightBarrier="0">
             </rect>
             <rect width="68" height="15" id="sortingLineSensWhiteLightBarrierSLSystemModel" x="193"
-                y="200" class="lightBarrier sensorInactive" sortingLineSensWhiteLightBarrier="0"
-                data-param="sortingLineSensWhiteLightBarrier">
+                y="200" class="lightBarrier sensorInactive" sortingLineSensWhiteLightBarrier="0">
             </rect>
             <rect width="68" height="15" id="sortingLineSensBlueLightBarrierSLSystemModel" x="252"
-                y="185" class="lightBarrier sensorInactive" sortingLineSensBlueLightBarrier="0"
-                data-param="sortingLineSensBlueLightBarrier">
+                y="185" class="lightBarrier sensorInactive" sortingLineSensBlueLightBarrier="0">
             </rect>
             <rect width="68" height="15" id="sortingLineSensRedLightBarrierSLSystemModel" x="315"
-                y="200" class="lightBarrier sensorInactive" sortingLineSensRedLightBarrier="0"
-                data-param="sortingLineSensRedLightBarrier">
+                y="200" class="lightBarrier sensorInactive" sortingLineSensRedLightBarrier="0">
             </rect>
             <rect width="110" height="60" x="48" y="90" class="colorLightBarrier">
             </rect>
-        </g>
-        <g id="sortingLineImpulseCounterSLSystemModel">
-            <rect width="60" height="18" x="360" y="88" fill="#ffffff" stroke-width="1"
-                stroke="#6b7280" class="impulseCounterBackground">
-            </rect>
-            <text id="sortingLineSensImpulseCounterRawSLSystemModel" x="368" y="106.1015625"
-                font-size="12" font-family="monospace" text-anchor="start" fill="#111827"
-                sortingLineSensImpulseCounterRaw="0" data-param="sortingLineSensImpulseCounterRaw">
-                <tspan dy="0" x="368">0</tspan>
-            </text>
         </g>
     </g>
     <g id="MPSystemModel"
@@ -325,11 +297,10 @@
             </polygon>
         </g>
     </g>
-    <g id="VGRSystemModel_01"
+    <g id="VGRSystemModel_02"
         transform="matrix(-1,1.2246467991473532e-16,-1.2246467991473532e-16,-1,750,810)">
         <g>
-            <rect width="257" height="186" class="woodBase" id="woodBaseVGRSystemModel_01"
-                data-role="machineBody"
+            <rect width="257" height="186" class="woodBase" id="woodBaseVGRSystemModel_02"
                 fill="red">
             </rect>
         </g>
@@ -355,34 +326,23 @@
             </circle>
         </g>
         <g>
-            <g id="vgrArmRotationVGRSystemModel_01" transform="rotate(0 214 105)"
-                data-role="armRotation"
-                VGRSystemModel_01.vacuumSensRotEncoderCounter="0"
-                data-rot-source-id="VGRSystemModel_01.vacuumSensRotEncoderCounter">
-                <rect width="110" height="18" id="vgrArmBodyVGRSystemModel_01" x="214" y="96"
-                    data-role="armBody"
-                    fill="#dc2626" stroke-width="2" stroke="#7f1d1d"
-                    VGRSystemModel_01.vacuumSensArmEncoderCounter="0"
-                    data-width-source-id="VGRSystemModel_01.vacuumSensArmEncoderCounter"
-                    data-width-min="110" data-width-max="220">
+            <g id="vgrArmRotationVGRSystemModel_02" transform="rotate(0 214 105)"
+                VGRSystemModel_02.vacuumSensRotEncoderCounter="0">
+                <rect width="165" height="18" id="vgrArmBodyVGRSystemModel_02" x="214" y="96"
+                    class="movingPart" fill="dimgray" stroke-width="2" stroke="#4b5563"
+                    VGRSystemModel_02.vacuumSensArmEncoderCounter="0">
                 </rect>
-                <rect width="22" height="28" id="vgrEndEffectorVGRSystemModel_01" x="318" y="91"
-                    data-role="endEffector"
-                    fill="#b91c1c" stroke-width="2" stroke="#7f1d1d"
-                    VGRSystemModel_01.vacuumSensArmEncoderCounter="0"
-                    data-x-source-id="VGRSystemModel_01.vacuumSensArmEncoderCounter"
-                    data-x-base="214" data-x-offset="-6" data-arm-min="110" data-arm-max="220">
+                <rect width="22" height="28" id="vgrEndEffectorVGRSystemModel_02" x="357" y="91"
+                    class="movingPart" fill="#6b7280" stroke-width="2" stroke="#4b5563"
+                    VGRSystemModel_02.vacuumSensArmEncoderCounter="0">
                 </rect>
             </g>
         </g>
     </g>
-    <g id="VGRSystemModel_02"
+    <g id="VGRSystemModel_01"
         transform="matrix(6.123233995736766e-17,1,-1,6.123233995736766e-17,660,1020)">
         <g>
-            <rect width="257" height="186" class="woodBase" id="woodBaseVGRSystemModel_02"
-                data-role="machineBody"
-                data-operational-source-id="VGRSystemModel_02.isOperational"
-                data-fill-when-false="red" data-fill-when-true="burlywood">
+            <rect width="257" height="186" class="woodBase" id="woodBaseVGRSystemModel_01">
             </rect>
             <rect width="5" height="5" fill="red">
             </rect>
@@ -409,23 +369,15 @@
             </circle>
         </g>
         <g>
-            <g id="vgrArmRotationVGRSystemModel_02" transform="rotate(0 214 105)"
-                data-role="armRotation"
-                VGRSystemModel_02.vacuumSensRotEncoderCounter="0"
-                data-rot-source-id="VGRSystemModel_02.vacuumSensRotEncoderCounter">
-                <rect width="110" height="18" id="vgrArmBodyVGRSystemModel_02" x="214" y="96"
-                    data-role="armBody"
-                    fill="#dc2626" stroke-width="2" stroke="#7f1d1d"
-                    VGRSystemModel_02.vacuumSensArmEncoderCounter="0"
-                    data-width-source-id="VGRSystemModel_02.vacuumSensArmEncoderCounter"
-                    data-width-min="110" data-width-max="220">
+            <g id="vgrArmRotationVGRSystemModel_01" transform="rotate(0 214 105)"
+                VGRSystemModel_01.vacuumSensRotEncoderCounter="0">
+                <rect width="165" height="18" id="vgrArmBodyVGRSystemModel_01" x="214" y="96"
+                    class="movingPart" fill="dimgray" stroke-width="2" stroke="#4b5563"
+                    VGRSystemModel_01.vacuumSensArmEncoderCounter="0">
                 </rect>
-                <rect width="22" height="28" id="vgrEndEffectorVGRSystemModel_02" x="318" y="91"
-                    data-role="endEffector"
-                    fill="#b91c1c" stroke-width="2" stroke="#7f1d1d"
-                    VGRSystemModel_02.vacuumSensArmEncoderCounter="0"
-                    data-x-source-id="VGRSystemModel_02.vacuumSensArmEncoderCounter"
-                    data-x-base="214" data-x-offset="-6" data-arm-min="110" data-arm-max="220">
+                <rect width="22" height="28" id="vgrEndEffectorVGRSystemModel_01" x="357" y="91"
+                    class="movingPart" fill="#6b7280" stroke-width="2" stroke="#4b5563"
+                    VGRSystemModel_01.vacuumSensArmEncoderCounter="0">
                 </rect>
             </g>
         </g>

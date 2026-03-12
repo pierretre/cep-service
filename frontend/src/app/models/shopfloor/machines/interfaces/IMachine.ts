@@ -1,10 +1,10 @@
-import { MachineUpdate } from '../../../machine-update.model';
+import { MachineStateUpdate } from '../../../machine-update.model';
 
 export interface MachineTelemetryData {
     attribute: string;
     value: unknown;
     timestamp: string;
-    rawUpdate?: MachineUpdate;
+    rawUpdate?: MachineStateUpdate;
 }
 
 export interface IMachine {

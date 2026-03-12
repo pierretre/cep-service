@@ -1,5 +1,6 @@
 package gemoc.mbdo.cep.api.service;
 
+import gemoc.mbdo.cep.api.dto.MachineStateUpdateResponse;
 import gemoc.mbdo.cep.api.model.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MachineTelemetrySseService {
 
     private final java.util.List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+    private final MachineStateRegistryService machineStateRegistryService;
+
+    public MachineTelemetrySseService(MachineStateRegistryService machineStateRegistryService) {
+        this.machineStateRegistryService = machineStateRegistryService;
+    }
 
     public SseEmitter registerClient() {
         SseEmitter emitter = new SseEmitter(0L);
@@ -53,27 +59,38 @@ public class MachineTelemetrySseService {
     }
 
     /**
-     * Forward Kafka events as-is so the frontend can handle SVG transformations.
+     * Update backend machine state from Kafka and emit full machine snapshots to
+     * SSE clients.
      */
     public void onKafkaEvent(Event event) {
         if (event == null) {
             return;
         }
-        broadcastMachineUpdate(event);
+        log.debug("[SSE] Received Kafka event - source: {}, key: {}, timestamp: {}",
+                event.getSource(), event.getKey(), event.getTimestamp());
+        machineStateRegistryService.applyEvent(event).ifPresent(stateUpdate -> {
+            log.info("[SSE] Machine state updated - machineId: {}, type: {}, state: {}",
+                    stateUpdate.getMachineId(), stateUpdate.getMachineType(), stateUpdate.getState());
+            this.broadcastMachineUpdate(stateUpdate);
+        });
     }
 
-    private void broadcastMachineUpdate(Event event) {
+    private void broadcastMachineUpdate(MachineStateUpdateResponse stateUpdate) {
         if (emitters.isEmpty()) {
+            log.debug("[SSE] No active SSE clients to broadcast machine update for: {}",
+                    stateUpdate.getMachineId());
             return;
         }
 
         List<SseEmitter> deadEmitters = new CopyOnWriteArrayList<>();
+        log.debug("[SSE] Broadcasting machine state update to {} SSE client(s) - machineId: {}",
+                emitters.size(), stateUpdate.getMachineId());
 
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("machine-update")
-                        .data(event));
+                        .data(stateUpdate));
             } catch (Exception e) {
                 if (!isClientDisconnect(e)) {
                     log.debug("Failed to send machine update to SSE client", e);

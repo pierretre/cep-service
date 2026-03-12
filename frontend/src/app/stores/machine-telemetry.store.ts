@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 
 import {
-    MachineUpdate,
+    MachineStateUpdate,
     ShopfloorMachineUpdate,
     toShopfloorMachineUpdate
 } from '../models/machine-update.model';
@@ -60,7 +60,7 @@ export class MachineTelemetryStore {
         this.machineTelemetryService.disconnectFromMachineStream();
     }
 
-    private processUpdate(rawUpdate: MachineUpdate): void {
+    private processUpdate(rawUpdate: MachineStateUpdate): void {
         const update = toShopfloorMachineUpdate(rawUpdate);
         const machineId = update.machineId.trim();
 
@@ -75,8 +75,8 @@ export class MachineTelemetryStore {
             }
 
             currentEntity.update({
-                attribute: update.attribute,
-                value: update.value,
+                attribute: 'state',
+                value: update.state,
                 timestamp: update.timestamp,
                 rawUpdate
             });

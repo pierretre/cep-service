@@ -27,6 +27,10 @@ public class KafkaEventConsumer {
 
     @KafkaListener(topics = "events", groupId = "cep-engine-consumer")
     public void consumeEvents(Event event) {
+        if (event != null) {
+            log.debug("[Kafka] Received event from topic 'events' - source: {}, key: {}, timestamp: {}",
+                    event.getSource(), event.getKey(), event.getTimestamp());
+        }
         machineTelemetrySseService.onKafkaEvent(event);
         engine.sendEvent(event);
     }

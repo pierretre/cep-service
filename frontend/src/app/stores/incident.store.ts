@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     providedIn: 'root'
 })
 export class IncidentStore {
-    private filterStore = inject(FilterStore);
+    private readonly filterStore = inject(FilterStore);
 
     filteredIncidents = signal<Array<Incident>>([]);
     private incidents: Array<Incident> = [];
@@ -32,7 +32,7 @@ export class IncidentStore {
         // React to filter changes
         effect(() => {
             const filters = this.filterStore.filters();
-            if (isNaN(filters.startDate.getTime()) || isNaN(filters.endDate.getTime())) {
+            if (Number.isNaN(filters.startDate.getTime()) || Number.isNaN(filters.endDate.getTime())) {
                 return;
             }
             console.log('[Store] Filters changed, reapplying filters');

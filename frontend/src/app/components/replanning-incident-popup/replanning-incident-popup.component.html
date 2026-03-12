@@ -12,7 +12,7 @@
 
         <label class="comment-label" for="replanningComment">Correction Comment</label>
         <textarea id="replanningComment" [(ngModel)]="comment"
-            placeholder="Describe the corrective action performed on the line..."></textarea>
+            placeholder="Comment the corrective action performed on the line..."></textarea>
 
         <button type="button" (click)="onValidateCorrection()" [disabled]="!comment.trim()" class="validate-button">
             Validate Correction

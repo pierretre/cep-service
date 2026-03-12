@@ -1,10 +1,14 @@
 import { IMachine, MachineTelemetryData } from '../interfaces/IMachine';
-import { toBoolean, toNumber } from './machine-rendering.utils';
 
 export class MultiProcessingStationModel implements IMachine {
     id: string;
     position: { x: number; y: number };
     rotation: number;
+
+    isOperational: boolean = false;
+    sawEnabled: boolean = false;
+    sawRotation: number = 0;
+    sliderExtended: boolean = false;
 
     private readonly telemetryState: Record<string, unknown> = {};
 
@@ -15,37 +19,52 @@ export class MultiProcessingStationModel implements IMachine {
     }
 
     update(data: MachineTelemetryData): void {
-        this.telemetryState[data.attribute] = data.value;
+        if (data.attribute !== 'state' || typeof data.value !== 'object' || data.value === null) {
+            return;
+        }
+
+        const state = data.value as Record<string, unknown>;
+        this.telemetryState['state'] = state;
+
+        if (typeof state['isOperational'] === 'boolean') {
+            this.isOperational = state['isOperational'];
+        }
+        if (typeof state['sawEnabled'] === 'boolean') {
+            this.sawEnabled = state['sawEnabled'];
+        }
+        if (typeof state['sawRotation'] === 'number') {
+            this.sawRotation = state['sawRotation'];
+        }
+        if (typeof state['sliderExtended'] === 'boolean') {
+            this.sliderExtended = state['sliderExtended'];
+        }
     }
 
     getTelemetryState(): Record<string, unknown> {
-        return this.telemetryState;
+        return {
+            ...this.telemetryState,
+            isOperational: this.isOperational,
+            sawEnabled: this.sawEnabled,
+            sawRotation: this.sawRotation,
+            sliderExtended: this.sliderExtended
+        };
     }
 
     render(machineEl: SVGGElement): void {
-        const isOperational = toBoolean(this.telemetryState['isOperational']);
-        const sawEnabled = toBoolean(this.telemetryState['sawEnabled']);
-        const sawRotation = toNumber(this.telemetryState['sawRotation']);
-        const sliderExtended = toBoolean(this.telemetryState['sliderExtended']);
-
         const woodBase = machineEl.querySelector<SVGRectElement>(`#woodBase${this.id} rect`);
-        if (woodBase && isOperational !== null) {
-            woodBase.setAttribute('fill', isOperational ? 'burlywood' : 'red');
+        if (woodBase) {
+            woodBase.setAttribute('fill', this.isOperational ? 'burlywood' : 'red');
         }
 
         const slider = machineEl.querySelector<SVGRectElement>('#sliderMPSystemModel rect');
-        if (slider && sliderExtended !== null) {
-            slider.classList.toggle('active', sliderExtended);
+        if (slider) {
+            slider.classList.toggle('active', this.sliderExtended);
         }
 
         const saw = machineEl.querySelector<SVGPolygonElement>('#sawMPSystemModel polygon');
         if (saw) {
-            if (sawEnabled !== null) {
-                saw.classList.toggle('active', sawEnabled);
-            }
-            if (sawRotation !== null) {
-                saw.setAttribute('transform', `rotate(${sawRotation} 156 180)`);
-            }
+            saw.classList.toggle('active', this.sawEnabled);
+            saw.setAttribute('transform', `rotate(${this.sawRotation} 156 180)`);
         }
     }
 

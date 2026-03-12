@@ -2,18 +2,18 @@ import { Injectable, NgZone } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { fromMachineUpdate, MachineUpdate } from '../models/machine-update.model';
+import { fromMachineUpdate, MachineStateUpdate } from '../models/machine-update.model';
 
 @Injectable({
     providedIn: 'root'
 })
 export class MachineTelemetryService {
     private eventSource: EventSource | null = null;
-    private machineUpdateSubject = new Subject<MachineUpdate>();
+    private readonly machineUpdateSubject = new Subject<MachineStateUpdate>();
 
-    constructor(private ngZone: NgZone) { }
+    constructor(private readonly ngZone: NgZone) { }
 
-    connectToMachineStream(): Observable<MachineUpdate> {
+    connectToMachineStream(): Observable<MachineStateUpdate> {
         if (this.eventSource) {
             this.eventSource.close();
         }
