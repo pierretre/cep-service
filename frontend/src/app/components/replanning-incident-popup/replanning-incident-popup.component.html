@@ -5,14 +5,10 @@
     </div>
 
     <div class="popup-body">
-        <div class="detail-card">
-            <h4>Required Action</h4>
-            <p>{{ incident.requiredAction }}</p>
-        </div>
+        <p>Your action is required to correct the issue and resume normal operations.</p>
 
-        <label class="comment-label" for="replanningComment">Correction Comment</label>
         <textarea id="replanningComment" [(ngModel)]="comment"
-            placeholder="Comment the corrective action performed on the line..."></textarea>
+            placeholder="Describe the corrective action performed on the production line ..."></textarea>
 
         <button type="button" (click)="onValidateCorrection()" [disabled]="!comment.trim()" class="validate-button">
             Validate Correction

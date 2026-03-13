@@ -1,6 +1,6 @@
 import { IMachine } from '../machines/interfaces/IMachine.js';
 import { ConveyorBeltModel } from '../machines/models/ConveyorBelt.model.js';
-import { HighBayWarehouseModel } from '../machines/models/HighBayWharehouse.js';
+import { HighBayWarehouseModel } from '../machines/models/HighBayWharehouse.model.js';
 import { SortingLineModel } from '../machines/models/SortingLine.model.js';
 import { MultiProcessingStationModel } from '../machines/models/MultiProcessingStation.model.js';
 import { VacuumGripperModel } from '../machines/models/VacummGripper.model.js';

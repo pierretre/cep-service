@@ -23,6 +23,6 @@ public class GenericMachineState extends AbstractMachineState {
 
     @Override
     public Map<String, Object> toState() {
-        return new LinkedHashMap<>(state);
+        return withCommonState(state);
     }
 }

@@ -1,34 +1,16 @@
-import { IMachine, MachineTelemetryData } from '../interfaces/IMachine';
+import { MachineTelemetryData } from '../interfaces/IMachine';
+import { GenericMachine } from './GenericMachine.model';
 
-export class MultiProcessingStationModel implements IMachine {
-    id: string;
-    position: { x: number; y: number };
-    rotation: number;
+export class MultiProcessingStationModel extends GenericMachine {
 
-    isOperational: boolean = false;
     sawEnabled: boolean = false;
     sawRotation: number = 0;
     sliderExtended: boolean = false;
 
-    private readonly telemetryState: Record<string, unknown> = {};
-
-    constructor(id: string, position: { x: number; y: number }, rotation: number) {
-        this.id = id;
-        this.position = position;
-        this.rotation = rotation;
-    }
-
-    update(data: MachineTelemetryData): void {
-        if (data.attribute !== 'state' || typeof data.value !== 'object' || data.value === null) {
-            return;
-        }
-
+    override update(data: MachineTelemetryData): void {
+        super.update(data);
         const state = data.value as Record<string, unknown>;
-        this.telemetryState['state'] = state;
 
-        if (typeof state['isOperational'] === 'boolean') {
-            this.isOperational = state['isOperational'];
-        }
         if (typeof state['sawEnabled'] === 'boolean') {
             this.sawEnabled = state['sawEnabled'];
         }
@@ -40,21 +22,8 @@ export class MultiProcessingStationModel implements IMachine {
         }
     }
 
-    getTelemetryState(): Record<string, unknown> {
-        return {
-            ...this.telemetryState,
-            isOperational: this.isOperational,
-            sawEnabled: this.sawEnabled,
-            sawRotation: this.sawRotation,
-            sliderExtended: this.sliderExtended
-        };
-    }
-
-    render(machineEl: SVGGElement): void {
-        const woodBase = machineEl.querySelector<SVGRectElement>(`#woodBase${this.id} rect`);
-        if (woodBase) {
-            woodBase.setAttribute('fill', this.isOperational ? 'burlywood' : 'red');
-        }
+    override render(machineEl: SVGGElement): void {
+        super.render(machineEl);
 
         const slider = machineEl.querySelector<SVGRectElement>('#sliderMPSystemModel rect');
         if (slider) {
@@ -67,5 +36,4 @@ export class MultiProcessingStationModel implements IMachine {
             saw.setAttribute('transform', `rotate(${this.sawRotation} 156 180)`);
         }
     }
-
 }

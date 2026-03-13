@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class HighBayWarehouseState extends AbstractMachineState {
 
-    private boolean isOperational;
     private boolean storageA;
     private boolean storageB;
     private boolean storageC;
@@ -28,9 +27,7 @@ public class HighBayWarehouseState extends AbstractMachineState {
             return;
         }
 
-        if (normalizedAttribute.contains("isoperational")) {
-            isOperational = boolValue;
-        } else if (normalizedAttribute.contains("storagea")) {
+        if (normalizedAttribute.contains("storagea")) {
             storageA = boolValue;
         } else if (normalizedAttribute.contains("storageb")) {
             storageB = boolValue;
@@ -46,12 +43,11 @@ public class HighBayWarehouseState extends AbstractMachineState {
     @Override
     public Map<String, Object> toState() {
         Map<String, Object> state = new LinkedHashMap<>();
-        state.put("isOperational", isOperational);
         state.put("storageA", storageA);
         state.put("storageB", storageB);
         state.put("storageC", storageC);
         state.put("inputBarrier", inputBarrier);
         state.put("outputBarrier", outputBarrier);
-        return state;
+        return withCommonState(state);
     }
 }

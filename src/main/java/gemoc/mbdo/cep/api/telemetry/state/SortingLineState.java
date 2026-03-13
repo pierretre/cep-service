@@ -62,6 +62,6 @@ public class SortingLineState extends AbstractMachineState {
         state.put("sortingLineSensBlueLightBarrier", sortingLineSensBlueLightBarrier);
         state.put("sortingLineSensRedLightBarrier", sortingLineSensRedLightBarrier);
         state.put("sortingLineSensImpulseCounterRaw", sortingLineSensImpulseCounterRaw);
-        return state;
+        return withCommonState(state);
     }
 }

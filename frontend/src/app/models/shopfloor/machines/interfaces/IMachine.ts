@@ -11,8 +11,9 @@ export interface IMachine {
     id: string;
     position: { x: number; y: number };
     rotation: number;
+    isOperational: boolean;
+    lastUpdateTimestamp: Date | null;
 
     update(data: MachineTelemetryData): void;
-    getTelemetryState(): Record<string, unknown>;
     render(machineEl: SVGGElement): void;
 }

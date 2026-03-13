@@ -5,7 +5,6 @@ import java.util.Map;
 
 public class MultiProcessingStationState extends AbstractMachineState {
 
-    private boolean isOperational;
     private boolean sawEnabled;
     private double sawRotation;
     private boolean sliderExtended;
@@ -23,10 +22,6 @@ public class MultiProcessingStationState extends AbstractMachineState {
     protected void applyAttributeInternal(String normalizedAttribute, Object value) {
         Boolean boolValue = asBoolean(value);
         if (boolValue != null) {
-            if (normalizedAttribute.contains("isoperational")) {
-                isOperational = boolValue;
-                return;
-            }
             if (normalizedAttribute.contains("sawenabled")) {
                 sawEnabled = boolValue;
                 return;
@@ -46,10 +41,9 @@ public class MultiProcessingStationState extends AbstractMachineState {
     @Override
     public Map<String, Object> toState() {
         Map<String, Object> state = new LinkedHashMap<>();
-        state.put("isOperational", isOperational);
         state.put("sawEnabled", sawEnabled);
         state.put("sawRotation", sawRotation);
         state.put("sliderExtended", sliderExtended);
-        return state;
+        return withCommonState(state);
     }
 }

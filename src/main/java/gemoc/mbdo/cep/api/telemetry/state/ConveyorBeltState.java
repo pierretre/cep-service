@@ -10,8 +10,6 @@ public class ConveyorBeltState extends AbstractMachineState {
     private boolean sensorFeed;
     private boolean sensorSwap;
     private boolean sensorImpulse;
-    private double productPosition;
-    private boolean hasProduct;
 
     public ConveyorBeltState(String machineId) {
         super(machineId);
@@ -46,15 +44,6 @@ public class ConveyorBeltState extends AbstractMachineState {
             sensorImpulse = boolValue;
             return;
         }
-        if (normalizedAttribute.contains("hasproduct") && boolValue != null) {
-            hasProduct = boolValue;
-            return;
-        }
-
-        Double numberValue = asDouble(value);
-        if (normalizedAttribute.contains("productposition") && numberValue != null) {
-            productPosition = numberValue;
-        }
     }
 
     @Override
@@ -65,8 +54,6 @@ public class ConveyorBeltState extends AbstractMachineState {
         state.put("sensorFeed", sensorFeed);
         state.put("sensorSwap", sensorSwap);
         state.put("sensorImpulse", sensorImpulse);
-        state.put("productPosition", productPosition);
-        state.put("hasProduct", hasProduct);
-        return state;
+        return withCommonState(state);
     }
 }

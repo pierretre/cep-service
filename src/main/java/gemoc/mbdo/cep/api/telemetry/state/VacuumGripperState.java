@@ -1,6 +1,5 @@
 package gemoc.mbdo.cep.api.telemetry.state;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
@@ -9,7 +8,6 @@ import java.util.Map;
 @Slf4j
 public class VacuumGripperState extends AbstractMachineState {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final double MAX_VERTICAL_ENCODER_COUNTER = 1750d;
     private static final double MAX_ARM_ENCODER_COUNTER = 1970d;
     private static final double MAX_ROT_ENCODER_COUNTER = 3040d;
@@ -19,14 +17,12 @@ public class VacuumGripperState extends AbstractMachineState {
     private static final double MAX_ARM_EXTENSION_MM = 315d;
     private static final double MAX_ARM_ROTATION_DEG = 360d;
 
-    private boolean isOperational;
     private double armExtension;
     private double armRotation;
     private double gripperExtension;
     private boolean gripperState;
     private boolean isArmElevated;
     private boolean isArmExtended;
-    private boolean isInitialized;
 
     public VacuumGripperState(String machineId) {
         super(machineId);
@@ -40,17 +36,8 @@ public class VacuumGripperState extends AbstractMachineState {
 
     @Override
     protected void applyAttributeInternal(String normalizedAttribute, Object value) {
-        if (normalizedAttribute.contains("machinefeedback")) {
-            applyMachineFeedback(value);
-            return;
-        }
-
         Boolean boolValue = asBoolean(value);
         if (boolValue != null) {
-            if (normalizedAttribute.contains("isoperational")) {
-                isOperational = boolValue;
-                return;
-            }
             if (normalizedAttribute.contains("gripperstate")) {
                 gripperState = boolValue;
                 return;
@@ -100,49 +87,22 @@ public class VacuumGripperState extends AbstractMachineState {
     @Override
     public Map<String, Object> toState() {
         Map<String, Object> state = new LinkedHashMap<>();
-        state.put("isOperational", isOperational);
         state.put("armExtension", armExtension);
         state.put("armRotation", armRotation);
         state.put("gripperExtension", gripperExtension);
         state.put("gripperState", gripperState);
         state.put("isArmElevated", isArmElevated);
         state.put("isArmExtended", isArmExtended);
-        state.put("isInitialized", isInitialized);
-        return state;
+        return withCommonState(state);
     }
 
     @Override
-    public boolean isReadyForFrontend() {
-        return isInitialized;
-    }
-
-    private void applyMachineFeedback(Object value) {
-        Map<String, Object> payload = asMap(value);
-        if (payload == null && value instanceof String text) {
-            try {
-                payload = OBJECT_MAPPER.readValue(text, Map.class);
-            } catch (Exception ignored) {
-                payload = null;
-            }
-        }
-
-        if (payload == null) {
-            return;
-        }
-
-        Object status = payload.get("status");
-        if (!(status instanceof String statusText)) {
-            return;
-        }
-
-        if ("INITIALIZED_IDLE".equals(statusText)) {
-            armRotation = 0d;
-            armExtension = MIN_ARM_EXTENSION_MM;
-            isArmElevated = true;
-            isArmExtended = false;
-            isInitialized = true;
-            log.info("[{}] VGR initialized from machine feedback status INITIALIZED_IDLE", machineId);
-        }
+    protected void onInitializedFromFeedback(Map<String, Object> payload) {
+        armRotation = 0d;
+        armExtension = MIN_ARM_EXTENSION_MM;
+        isArmElevated = true;
+        isArmExtended = false;
+        log.info("[{}] VGR initialization defaults applied", machineId);
     }
 
     private void applyVerticalCounter(double rawCounter) {

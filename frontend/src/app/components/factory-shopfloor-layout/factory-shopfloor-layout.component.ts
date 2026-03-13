@@ -6,7 +6,49 @@ import { MachineTelemetryStore } from '../../stores/machine-telemetry.store';
 
 @Component({
     selector: 'app-factory-shopfloor-layout',
-    template: `<div #svgContainer class="shopfloor-container"></div>`,
+    template: `
+        <div class="shopfloor-layout-root flex h-screen">
+            <aside
+                id="shopfloor-legend-panel"
+                class="legend-panel z-20 h-full w-72 border-r border-slate-200 bg-white"
+                aria-label="Shopfloor legend"
+            >
+                <div class="h-full overflow-y-auto px-4 py-5">
+                    <h2 class="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-500">Shopfloor Legend</h2>
+                    <p class="mb-4 text-xs text-slate-500">Machine color states</p>
+
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li class="flex items-center gap-3">
+                            <span class="h-4 w-4 rounded border border-red-200" style="background:#dc2626"></span>
+                            <span>Not operational</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="h-4 w-4 rounded border border-amber-200" style="background:#fef3c7"></span>
+                            <span>Not initialized</span>
+                        </li>
+                    </ul>
+
+                    <p class="mb-4 mt-6 text-xs text-slate-500">SVG Elements</p>
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li class="flex items-center gap-3">
+                            <span class="h-4 w-4 rounded border border-blue-200" style="background:rgba(59, 130, 246, 0.3)"></span>
+                            <span>Access Zone</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="h-4 w-4 rounded border border-gray-400" style="background:#374151"></span>
+                            <span>Moving Parts</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="h-4 w-4 rounded border border-yellow-300" style="background:rgba(255, 255, 0, 0.5)"></span>
+                            <span>Light Barrier Sensor</span>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <div #svgContainer class="shopfloor-container flex-1"></div>
+        </div>
+    `,
     styleUrls: ['./factory-shopfloor-layout.component.css'],
     standalone: true
 })
@@ -70,8 +112,6 @@ export class FactoryShopfloorLayoutComponent implements AfterViewInit, OnDestroy
     }
 
     private renderInitialMachineState(): void {
-        console.log('[Shopfloor] Rendering initial machine states');
-        console.log('[Shopfloor] Machine cache size:', this.machineCache.size);
         console.log(this.machineCache);
         this.machineCache.forEach((machineEl, machineId) => {
             const machine = this.telemetryStore.getMachineById(machineId);
