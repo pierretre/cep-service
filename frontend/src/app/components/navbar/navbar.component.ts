@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type NavbarRole = 'Operational Engineer' | 'Factory Manager';
+export type NavbarRole = 'Maintenance Engineer' | 'Factory Manager';
 
 @Component({
     selector: 'app-navbar',
@@ -14,7 +14,7 @@ export class NavbarComponent {
     @Input() title = 'Incident History';
     @Input() showExportButton = true;
     @Input() showRoleToggle = false;
-    @Input() selectedRole: NavbarRole = 'Operational Engineer';
+    @Input() selectedRole: NavbarRole = 'Maintenance Engineer';
 
     @Output() refresh = new EventEmitter<void>();
     @Output() export = new EventEmitter<void>();

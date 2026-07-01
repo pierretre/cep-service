@@ -18,10 +18,10 @@ const ROLE_SESSION_STORAGE_KEY = 'factorySupervisionRole';
 export class FactorySupervisionComponent implements OnInit {
     private replanningIncidentStore = inject(ReplanningIncidentStore);
 
-    selectedRole = signal<NavbarRole>('Operational Engineer');
+    selectedRole = signal<NavbarRole>('Maintenance Engineer');
     currentReplanningIncident = this.replanningIncidentStore.currentIncident;
     replanningHistory = this.replanningIncidentStore.history;
-    isOperationalEngineer = computed(() => this.selectedRole() === 'Operational Engineer');
+    isOperationalEngineer = computed(() => this.selectedRole() === 'Maintenance Engineer');
 
     ngOnInit(): void {
         const savedRole = sessionStorage.getItem(ROLE_SESSION_STORAGE_KEY);
@@ -45,6 +45,6 @@ export class FactorySupervisionComponent implements OnInit {
     }
 
     private isValidRole(role: string | null): role is NavbarRole {
-        return role === 'Operational Engineer' || role === 'Factory Manager';
+        return role === 'Maintenance Engineer' || role === 'Factory Manager';
     }
 }

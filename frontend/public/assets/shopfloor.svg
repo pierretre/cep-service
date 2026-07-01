@@ -239,9 +239,6 @@
             <rect width="20" height="80" id="sensorSwapCBSystemModel" x="220" y="-10"
                 class="lightBarrier sensorInactive">
             </rect>
-            <rect width="20" height="80" id="sensorImpulseCBSystemModel" x="125" y="-10"
-                class="lightBarrier sensorInactive">
-            </rect>
         </g>
     </g>
     <g id="HBWSystemModel" transform="matrix(1,0,0,1,460,150)">

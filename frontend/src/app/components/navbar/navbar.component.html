@@ -6,11 +6,11 @@
         <div class="flex items-center gap-2">
             <div *ngIf="showRoleToggle" class="inline-flex rounded-lg border border-gray-300 overflow-hidden"
                 role="group" aria-label="Role selector">
-                <button type="button" (click)="onRoleChange('Operational Engineer')" [ngClass]="{
-                        'bg-blue-600 text-white': selectedRole === 'Operational Engineer',
-                        'bg-white text-gray-900 hover:bg-gray-100': selectedRole !== 'Operational Engineer'
+                <button type="button" (click)="onRoleChange('Maintenance Engineer')" [ngClass]="{
+                        'bg-blue-600 text-white': selectedRole === 'Maintenance Engineer',
+                        'bg-white text-gray-900 hover:bg-gray-100': selectedRole !== 'Maintenance Engineer'
                     }" class="px-4 py-2 text-sm font-medium border-r border-gray-300">
-                    Operational Engineer
+                    Maintenance Engineer
                 </button>
                 <button type="button" (click)="onRoleChange('Factory Manager')" [ngClass]="{
                         'bg-blue-600 text-white': selectedRole === 'Factory Manager',
