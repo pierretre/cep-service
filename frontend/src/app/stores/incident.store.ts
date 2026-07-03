@@ -3,6 +3,7 @@ import { Incident, IncidentSeverity } from '../models';
 import { FilterStore } from './filter.store';
 import { IncidentService } from '../services/incident.service';
 import { Subscription } from 'rxjs';
+import { MOCK_INCIDENTS } from '../mocks/incident.mock';
 
 /**
  * Store for managing incidents, time range, resolution, and severity filters.
@@ -50,6 +51,10 @@ export class IncidentStore {
             },
             error: (error) => {
                 console.error('[Store] Error loading incidents:', error);
+                console.log('[Store] Falling back to mock data');
+                this.incidents = MOCK_INCIDENTS;
+                this.lastUpdateTime = new Date();
+                this.applyFilters();
             }
         });
     }
