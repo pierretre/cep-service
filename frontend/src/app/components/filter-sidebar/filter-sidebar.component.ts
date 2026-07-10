@@ -8,6 +8,7 @@ import { FilterConfig } from '../../models/filter-config.model';
 import { RuleService } from '../../services/rule.service';
 import { Rule } from '../../models/rule.model';
 import { HamstersEvent } from '../../decorators/hamsters.decorator';
+import { MOCK_RULES } from '../../mocks/incident.mock';
 
 @Component({
     selector: 'app-filter-sidebar',
@@ -42,20 +43,24 @@ export class FilterSidebarComponent implements OnInit {
 
     loadRules(): void {
         this.ruleService.getAllRules().subscribe({
-            next: (rules) => {
-                this.availableRules = rules;
-
-                // If no rules are currently selected, select all by default
-                if (this.filters.selectedRules.length === 0 && rules.length > 0) {
-                    const allRuleNames = rules.map(rule => rule.name);
-                    this.filterStore.updateFilters({ selectedRules: allRuleNames });
-                    this.historyStore.saveState(this.filters);
-                }
-            },
+            next: (rules) => this.applyLoadedRules(rules),
             error: (err) => {
                 console.error('Failed to load rules:', err);
+                console.log('[FilterSidebar] Falling back to mock rules');
+                this.applyLoadedRules(MOCK_RULES);
             }
         });
+    }
+
+    private applyLoadedRules(rules: Rule[]): void {
+        this.availableRules = rules;
+
+        // If no rules are currently selected, select all by default
+        if (this.filters.selectedRules.length === 0 && rules.length > 0) {
+            const allRuleNames = rules.map(rule => rule.name);
+            this.filterStore.updateFilters({ selectedRules: allRuleNames });
+            this.historyStore.saveState(this.filters);
+        }
     }
 
     getStartDateTimeString(): string {
@@ -220,8 +225,12 @@ export class FilterSidebarComponent implements OnInit {
         }
     }
 
-    @HamstersEvent('Set incident Severity')
-    onSeverityChange(): void {
+    @HamstersEvent('Set incident Severity', undefined, (self: FilterSidebarComponent, [level, checked]) => ({
+        level,
+        checked,
+        severityLevels: { ...self.filters.severityLevels },
+    }))
+    onSeverityChange(level: keyof FilterConfig['severityLevels'], checked: boolean): void {
         this.onFilterChange();
     }
 

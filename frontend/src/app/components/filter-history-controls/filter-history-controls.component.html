@@ -1,5 +1,5 @@
 <div class="flex gap-1">
-    <button (click)="onBack()" [disabled]="!canGoBack" type="button" [class.opacity-30]="!canGoBack"
+    <button (click)="onBack()" [disabled]="!canGoBack" type="button" data-hamsters-tracked [class.opacity-30]="!canGoBack"
         [class.cursor-not-allowed]="!canGoBack"
         class="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors disabled:hover:bg-transparent disabled:hover:text-gray-600"
         title="Previous filters">
@@ -7,7 +7,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
     </button>
-    <button (click)="onForward()" [disabled]="!canGoForward" type="button" [class.opacity-30]="!canGoForward"
+    <button (click)="onForward()" [disabled]="!canGoForward" type="button" data-hamsters-tracked [class.opacity-30]="!canGoForward"
         [class.cursor-not-allowed]="!canGoForward"
         class="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors disabled:hover:bg-transparent disabled:hover:text-gray-600"
         title="Next filters">

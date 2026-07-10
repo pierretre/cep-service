@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
             <div class="flex items-center gap-2">
-                <button type="button" (click)="onReset()" class="text-gray-600 hover:text-gray-900 focus:outline-none"
+                <button type="button" (click)="onReset()" data-hamsters-tracked class="text-gray-600 hover:text-gray-900 focus:outline-none"
                     title="Reset all filters">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -71,20 +71,20 @@
             <label class="block mb-2 text-sm font-medium text-gray-900">Severity</label>
             <div class="space-y-2">
                 <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.critical" (ngModelChange)="onSeverityChange()"
-                        id="severity-critical" type="checkbox"
+                    <input [(ngModel)]="filters.severityLevels.critical" (ngModelChange)="onSeverityChange('critical', $event)"
+                        id="severity-critical" type="checkbox" data-hamsters-tracked
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                     <label for="severity-critical" class="ml-2 text-sm font-medium text-gray-900">Critical</label>
                 </div>
                 <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.warning" (ngModelChange)="onSeverityChange()"
-                        id="severity-warning" type="checkbox"
+                    <input [(ngModel)]="filters.severityLevels.warning" (ngModelChange)="onSeverityChange('warning', $event)"
+                        id="severity-warning" type="checkbox" data-hamsters-tracked
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                     <label for="severity-warning" class="ml-2 text-sm font-medium text-gray-900">Warning</label>
                 </div>
                 <div class="flex items-center">
-                    <input [(ngModel)]="filters.severityLevels.info" (ngModelChange)="onSeverityChange()"
-                        id="severity-info" type="checkbox"
+                    <input [(ngModel)]="filters.severityLevels.info" (ngModelChange)="onSeverityChange('info', $event)"
+                        id="severity-info" type="checkbox" data-hamsters-tracked
                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                     <label for="severity-info" class="ml-2 text-sm font-medium text-gray-900">Info</label>
                 </div>
